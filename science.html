@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Science Explorer 🔬</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0d0b1e;--card:#1e1e0e;--accent:#a8ff78;--accent2:#ffd93d;--text:#f0eaff;--muted:#9b8fc4}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+  .back-btn{position:fixed;top:16px;left:16px;background:rgba(255,255,255,0.1);border:none;color:white;padding:10px 18px;border-radius:100px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;text-decoration:none;font-size:0.9rem;z-index:100}
+  .back-btn:hover{background:rgba(255,255,255,0.2)}
+  h1{font-family:'Fredoka One',cursive;font-size:2.5rem;background:linear-gradient(135deg,#a8ff78,#ffd93d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:60px 0 6px;text-align:center}
+  .subtitle{color:var(--muted);margin-bottom:30px;text-align:center}
+  .game-box{background:var(--card);border:2px solid rgba(168,255,120,0.2);border-radius:24px;padding:30px 36px;max-width:580px;width:100%}
+  .topic-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+  .topic-btn{background:rgba(168,255,120,0.08);border:1px solid rgba(168,255,120,0.2);color:var(--text);padding:12px 8px;border-radius:14px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;text-align:center;transition:all 0.2s}
+  .topic-btn.active,.topic-btn:hover{background:var(--accent);border-color:var(--accent);color:#0d0b1e}
+  .start-btn{background:linear-gradient(135deg,#a8ff78,#50e6a0);border:none;color:#0d0b1e;padding:16px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.3rem;cursor:pointer;width:100%;margin-top:8px}
+  .start-btn:hover{transform:scale(1.03)}
+  .score-row{display:flex;justify-content:space-between;gap:10px;margin-bottom:20px}
+  .score-item{background:rgba(168,255,120,0.1);border-radius:12px;padding:10px 12px;flex:1;text-align:center}
+  .score-label{font-size:0.7rem;color:var(--muted);display:block}
+  .score-val{font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--accent)}
+  .topic-badge{display:inline-block;background:rgba(168,255,120,0.12);border:1px solid rgba(168,255,120,0.3);color:var(--accent);padding:4px 16px;border-radius:100px;font-size:0.8rem;font-weight:800;margin-bottom:16px}
+  .fact-card{background:rgba(255,255,255,0.04);border-radius:16px;padding:20px;margin:12px 0;font-size:1.05rem;line-height:1.7;min-height:100px;display:flex;align-items:center;justify-content:center;text-align:center}
+  .question-text{font-family:'Fredoka One',cursive;font-size:1.3rem;color:white;margin:16px 0;text-align:center;line-height:1.4;min-height:60px}
+  .options-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+  .option-btn{background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.12);color:var(--text);padding:14px 12px;border-radius:14px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.95rem;transition:all 0.2s;text-align:center;line-height:1.3}
+  .option-btn:hover:not(:disabled){background:rgba(168,255,120,0.12);border-color:var(--accent)}
+  .option-btn.correct{background:rgba(168,255,120,0.2);border-color:var(--accent);color:var(--accent)}
+  .option-btn.wrong{background:rgba(255,107,107,0.15);border-color:#ff6b6b;color:#ff6b6b}
+  .option-btn:disabled{cursor:default}
+  .explanation{background:rgba(168,255,120,0.07);border-left:4px solid var(--accent);padding:14px 18px;border-radius:0 12px 12px 0;font-size:0.93rem;line-height:1.6;margin-top:12px;display:none}
+  .next-btn{background:linear-gradient(135deg,#a8ff78,#50e6a0);border:none;color:#0d0b1e;padding:14px 40px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.1rem;cursor:pointer;display:none;width:100%;margin-top:12px}
+  .feedback-big{font-family:'Fredoka One',cursive;font-size:1.6rem;text-align:center;min-height:44px;margin:8px 0}
+  .feedback-big.correct{color:#a8ff78}
+  .feedback-big.wrong{color:#ff6b6b}
+  .loading-dots::after{content:'...';animation:dots 1.2s steps(3,end) infinite}
+  @keyframes dots{0%,100%{clip-path:inset(0 67% 0 0)}33%{clip-path:inset(0 33% 0 0)}67%{clip-path:inset(0 0% 0 0)}}
+  .start-screen h2{font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--accent);margin-bottom:10px;text-align:center}
+  .start-screen p{color:var(--muted);text-align:center;margin-bottom:16px;line-height:1.6}
+</style>
+</head>
+<body>
+<a href="index.html" class="back-btn">← Home</a>
+<h1>🔬 Science Explorer</h1>
+<p class="subtitle">Discover amazing things about our world!</p>
+
+<div class="game-box">
+  <div id="startScreen" class="start-screen">
+    <h2>Pick a science topic! 🚀</h2>
+    <p>AI will create fun questions and amazing facts just for you — every game is different!</p>
+    <div class="topic-grid">
+      <button class="topic-btn active" onclick="setTopic(this,'animals')">🐾 Animals</button>
+      <button class="topic-btn" onclick="setTopic(this,'space')">🌌 Space</button>
+      <button class="topic-btn" onclick="setTopic(this,'human body')">🫀 Human Body</button>
+      <button class="topic-btn" onclick="setTopic(this,'plants')">🌱 Plants</button>
+      <button class="topic-btn" onclick="setTopic(this,'weather')">⛈️ Weather</button>
+      <button class="topic-btn" onclick="setTopic(this,'dinosaurs')">🦕 Dinosaurs</button>
+      <button class="topic-btn" onclick="setTopic(this,'ocean')">🌊 Ocean</button>
+      <button class="topic-btn" onclick="setTopic(this,'inventions')">💡 Inventions</button>
+      <button class="topic-btn" onclick="setTopic(this,'random science')">🎲 Surprise!</button>
+    </div>
+    <button class="start-btn" onclick="startGame()">🔭 Start Exploring!</button>
+  </div>
+
+  <div id="gameScreen" style="display:none">
+    <div class="score-row">
+      <div class="score-item"><span class="score-label">Score</span><span class="score-val" id="score">0</span></div>
+      <div class="score-item"><span class="score-label">Question</span><span class="score-val" id="qnum">1</span></div>
+      <div class="score-item"><span class="score-label">Streak</span><span class="score-val" id="streak">🔥0</span></div>
+    </div>
+    <div class="topic-badge" id="topicBadge">Animals</div>
+    <div class="fact-card" id="factCard"><span class="loading-dots">Generating question</span></div>
+    <div class="question-text" id="questionText"></div>
+    <div class="options-grid" id="optionsGrid"></div>
+    <div class="feedback-big" id="feedback"></div>
+    <div class="explanation" id="explanation"></div>
+    <button class="next-btn" id="nextBtn" onclick="loadQuestion()">Next Question →</button>
+  </div>
+</div>
+
+<script>
+let topic='animals', score=0, qnum=0, streak=0;
+
+function setTopic(btn, t){
+  document.querySelectorAll('.topic-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  topic = t;
+}
+
+function startGame(){
+  document.getElementById('startScreen').style.display='none';
+  document.getElementById('gameScreen').style.display='block';
+  loadQuestion();
+}
+
+async function loadQuestion(){
+  qnum++;
+  document.getElementById('qnum').textContent = qnum;
+  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('explanation').style.display='none';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('questionText').textContent='';
+  document.getElementById('optionsGrid').innerHTML='';
+  document.getElementById('factCard').innerHTML='<span class="loading-dots">Loading amazing question</span>';
+  document.getElementById('topicBadge').textContent = topic.charAt(0).toUpperCase()+topic.slice(1);
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:400,
+        messages:[{role:'user',content:`Create a fun science quiz question about "${topic}" for an 8-year-old. 
+Return ONLY valid JSON (no markdown, no extra text):
+{"fact":"An amazing fun fact intro sentence about the topic (1 sentence, start with an emoji)","question":"The question","options":["correct answer","wrong1","wrong2","wrong3"],"explanation":"Why the answer is correct (1-2 sentences, fun and educational)"}
+The first option in the array must always be the correct answer.`}]
+      })
+    });
+    const data = await res.json();
+    let text = data.content[0].text.trim();
+    text = text.replace(/```json|```/g,'').trim();
+    const q = JSON.parse(text);
+    
+    document.getElementById('factCard').textContent = q.fact;
+    document.getElementById('questionText').textContent = q.question;
+    
+    // Shuffle options
+    const opts = q.options.slice();
+    const correct = opts[0];
+    opts.sort(()=>Math.random()-0.5);
+    
+    const grid = document.getElementById('optionsGrid');
+    opts.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = opt;
+      btn.onclick = () => checkAnswer(btn, opt===correct, q.explanation, correct, grid);
+      grid.appendChild(btn);
+    });
+  } catch(e) {
+    document.getElementById('factCard').textContent = '🔬 Science is amazing!';
+    document.getElementById('questionText').textContent = 'What do plants use to make their food?';
+    const opts = ['Sunlight, water and air','Only water','Only soil','Only sunlight'];
+    const grid = document.getElementById('optionsGrid');
+    opts.forEach((opt,i)=>{
+      const btn = document.createElement('button');
+      btn.className='option-btn';
+      btn.textContent=opt;
+      btn.onclick=()=>checkAnswer(btn,i===0,'Plants use photosynthesis — sunlight + water + CO2 = food and oxygen!','Sunlight, water and air',grid);
+      grid.appendChild(btn);
+    });
+  }
+}
+
+function checkAnswer(btn, isCorrect, explanation, correctAns, grid){
+  Array.from(grid.children).forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===correctAns) b.classList.add('correct');
+    else if(b===btn&&!isCorrect) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('feedback');
+  if(isCorrect){
+    score+=15; streak++;
+    document.getElementById('score').textContent=score;
+    document.getElementById('streak').textContent='🔥'+streak;
+    fb.className='feedback-big correct';
+    fb.textContent=['⭐ Correct!','🎉 Amazing!','🔥 Brilliant!','✅ That\'s right!'][Math.floor(Math.random()*4)];
+  } else {
+    streak=0;
+    document.getElementById('streak').textContent='🔥0';
+    fb.className='feedback-big wrong';
+    fb.textContent=['❌ Not quite!','💡 Good try!','🤔 Almost!'][Math.floor(Math.random()*3)];
+  }
+  document.getElementById('explanation').textContent='💡 '+explanation;
+  document.getElementById('explanation').style.display='block';
+  document.getElementById('nextBtn').style.display='block';
+}
+</script>
+</body>
+</html>

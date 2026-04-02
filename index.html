@@ -1,1 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sumaiya Sayibah's Learning Galaxy 🌟</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0b1e;
+    --card1: #1a1040;
+    --card2: #0f1e3a;
+    --accent1: #ff6b9d;
+    --accent2: #ffd93d;
+    --accent3: #6bcbff;
+    --accent4: #a8ff78;
+    --accent5: #ff9a3c;
+    --text: #f0eaff;
+    --muted: #9b8fc4;
+  }
 
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Nunito', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Starfield */
+  .stars {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .star {
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    animation: twinkle var(--dur) ease-in-out infinite alternate;
+  }
+  @keyframes twinkle {
+    from { opacity: 0.1; transform: scale(1); }
+    to   { opacity: 1;   transform: scale(1.4); }
+  }
+
+  /* Header */
+  header {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 50px 20px 20px;
+  }
+  .crown { font-size: 3rem; animation: bounce 1.5s ease-in-out infinite; display: inline-block; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+
+  header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  header p {
+    color: var(--muted);
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  /* Planet decoration */
+  .planet {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.15;
+    animation: float 8s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-20px) rotate(5deg)} }
+  .planet1 { width: 200px; height: 200px; background: radial-gradient(circle at 30% 30%, #ff6b9d, #6b0f3a); top: 5%; right: -5%; }
+  .planet2 { width: 130px; height: 130px; background: radial-gradient(circle at 30% 30%, #6bcbff, #0a2f5a); bottom: 10%; left: -3%; animation-delay: 3s; }
+  .planet3 { width: 80px; height: 80px; background: radial-gradient(circle at 30% 30%, #ffd93d, #7a5a00); top: 45%; right: 2%; animation-delay: 5s; }
+
+  /* Games grid */
+  .games-grid {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 24px 60px;
+  }
+
+  .game-card {
+    background: var(--card-bg, #1a1040);
+    border: 2px solid var(--card-border, rgba(255,255,255,0.08));
+    border-radius: 24px;
+    padding: 28px 24px;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s ease, border-color 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    animation: cardIn 0.6s ease both;
+  }
+  .game-card:nth-child(1){animation-delay:0.1s}
+  .game-card:nth-child(2){animation-delay:0.15s}
+  .game-card:nth-child(3){animation-delay:0.2s}
+  .game-card:nth-child(4){animation-delay:0.25s}
+  .game-card:nth-child(5){animation-delay:0.3s}
+  .game-card:nth-child(6){animation-delay:0.35s}
+  .game-card:nth-child(7){animation-delay:0.4s}
+  .game-card:nth-child(8){animation-delay:0.45s}
+  .game-card:nth-child(9){animation-delay:0.5s}
+  .game-card:nth-child(10){animation-delay:0.55s}
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .game-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--card-glow);
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: inherit;
+  }
+  .game-card:hover { transform: translateY(-8px) scale(1.03); box-shadow: 0 20px 60px var(--card-shadow, rgba(255,107,157,0.25)); border-color: var(--card-accent, #ff6b9d); }
+  .game-card:hover::before { opacity: 1; }
+
+  .card-emoji { font-size: 3.5rem; display: block; margin-bottom: 14px; animation: wiggle 3s ease-in-out infinite; }
+  @keyframes wiggle { 0%,90%,100%{transform:rotate(0)} 92%{transform:rotate(-8deg)} 96%{transform:rotate(8deg)} }
+
+  .card-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-bottom: 10px;
+    background: var(--card-badge-bg);
+    color: var(--card-badge-text, white);
+  }
+
+  .card-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    color: white;
+    margin-bottom: 8px;
+  }
+  .card-desc { color: var(--muted); font-size: 0.93rem; line-height: 1.5; }
+
+  .play-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 18px;
+    padding: 10px 22px;
+    border-radius: 100px;
+    background: var(--card-accent, #ff6b9d);
+    color: white;
+    font-weight: 800;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+  }
+  .play-btn:hover { transform: scale(1.08); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+
+  /* Footer */
+  footer {
+    position: relative; z-index: 10;
+    text-align: center;
+    padding: 20px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  /* Sparkle trail */
+  .sparkle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 999;
+    font-size: 1.2rem;
+    animation: sparkle-fade 0.8s ease forwards;
+  }
+  @keyframes sparkle-fade {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to   { opacity: 0; transform: translateY(-40px) scale(0.3); }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="planet planet1"></div>
+<div class="planet planet2"></div>
+<div class="planet planet3"></div>
+
+<header>
+  <div class="crown">👑</div>
+  <h1>Sumaiya Sayibah's<br>Learning Galaxy</h1>
+  <p>✨ 10 magical games just for you! ✨</p>
+</header>
+
+<div class="games-grid">
+
+  <div class="game-card" style="--card-bg:#1e0e30;--card-border:rgba(255,107,157,0.2);--card-accent:#ff6b9d;--card-shadow:rgba(255,107,157,0.3);--card-glow:linear-gradient(135deg,rgba(255,107,157,0.05),transparent);--card-badge-bg:rgba(255,107,157,0.2);--card-badge-text:#ff6b9d" onclick="openGame('math')">
+    <span class="card-emoji">🧮</span>
+    <span class="card-badge">Math</span>
+    <div class="card-title">Math Blast!</div>
+    <p class="card-desc">Race against time! Solve fun addition, subtraction, multiplication & division puzzles. Earn stars and level up!</p>
+    <button class="play-btn">▶ Play Now</button>
+  </div>
+
+  <div class="game-card" style="--card-bg:#0e1e30;--card-border:rgba(107,203,255,0.2);--card-accent:#6bcbff;--card-shadow:rgba(107,203,255,0.3);--card-glow:linear-gradient(135deg,rgba(107,203,255,0.05),transparent);--card-badge-bg:rgba(107,203,255,0.2);--card-badge-text:#6bcbff" onclick="openGame('spelling')">
+    <span class="card-emoji">📝</span>
+    <span class="card-badge">Language</span>
+    <div class="card-title">Word Wizard</div>
+    <p class="card-desc">Hear a word, spell it right! Explore hundreds of English words with hints and fun facts about each one.</p>
+    <button class="play-btn" style="background:#6bcbff;color:#0d0b1e">▶ Play Now</button>
+  </div>
+
+  <div class="game-card" style="--card-bg:#1e1e0e;--card-border:rgba(168,255,120,0.2);--card-accent:#a8ff78;--card-shadow:rgba(168,255,120,0.3);--card-glow:linear-gradient(135deg,rgba(168,255,120,0.05),transparent);--card-badge-bg:rgba(168,255,120,0.2);--card-badge-text:#a8ff78" onclick="openGame('science')">
+    <span class="card-emoji">🔬</span>
+    <span class="card-badge">Science</span>
+    <div class="card-title">Science Explorer</div>
+    <p class="card-desc">Discover cool science facts! Animals, planets, human body, weather — learn something new every round!</p>
+    <button class="play-btn" style="background:#a8ff78;color:#0d0b1e">▶ Play Now</button>
+  </div>
+
+  <div class="game-card" style="--card-bg:#1e150e;--card-border:rgba(255,217,61,0.2);--card-accent:#ffd93d;--card-shadow:rgba(255,217,61,0.3);--card-glow:linear-gradient(135deg,rgba(255,217,61,0.05),transparent);--card-badge-bg:rgba(255,217,61,0.2);--card-badge-text:#ffd93d" onclick="openGame('memory')">
+    <span class="card-emoji">🧠</span>
+    <span class="card-badge">Brain</span>
+    <div class="card-title">Memory Master</div>
+    <p class="card-desc">Flip cards and match pairs! AI generates new themes every game — animals, flags, food, space and more!</p>
+    <button class="play-btn" style="background:#ffd93d;color:#0d0b1e">▶ Play Now</button>
+  </div>
+
+  <div class="game-card" style="--card-bg:#0e1e1a;--card-border:rgba(78,205,196,0.2);--card-accent:#4ecdc4;--card-shadow:rgba(78,205,196,0.3);--card-glow:linear-gradient(135deg,rgba(78,205,196,0.05),transparent);--card-badge-bg:rgba(78,205,196,0.2);--card-badge-text:#4ecdc4" onclick="openGame('quiz')">
+    <span class="card-emoji">🌍</span>
+    <span class="card-badge">General Knowledge</span>
+    <div class="card-title">Quiz Champion</div>
+    <p class="card-desc">Thousands of fun trivia questions! Geography, history, animals, sports — new questions every single time!</p>
+    <button class="play-btn" style="background:#4ecdc4;color:#0d0b1e">▶ Play Now</button>
+  </div>
+
+  <div class="game-card" style="--card-bg:#1e0e1e;--card-border:rgba(200,120,255,0.2);--card-accent:#c878ff;--card-shadow:rgba(200,120,255,0.3);--card-glow:linear-gradient(135deg,rgba(200,120,255,0.05),transparent);--card-badge-bg:rgba(200,120,255,0.2);--card-badge-text:#c878ff" onclick="openGame('story')">
+    <span class="card-emoji">📖</span>
+    <span class="card-badge">Creative</span>
+    <div class="card-title">Story Builder</div>
+    <p class="card-desc">You choose the adventure! Pick characters, settings and twists — AI writes a unique story just for you each time!</p>
+    <button class="play-btn" style="background:#c878ff">▶ Play Now</button>
+  </div>
+
+  <div class="game-card" style="--card-bg:#1a0e10;--card-border:rgba(255,154,60,0.2);--card-accent:#ff9a3c;--card-shadow:rgba(255,154,60,0.3);--card-glow:linear-gradient(135deg,rgba(255,154,60,0.05),transparent);--card-badge-bg:rgba(255,154,60,0.2);--card-badge-text:#ff9a3c" onclick="openGame('wordscramble')">
+    <span class="card-emoji">🔤</span>
+    <span class="card-badge">Puzzle</span>
+    <div class="card-title">Word Scramble</div>
+    <p class="card-desc">Unscramble jumbled letters to find the hidden word! Clues, categories and new words generated by AI forever!</p>
+    <button class="play-btn" style="background:#ff9a3c">▶ Play Now</button>
+  </div>
+
+  <div class="game-card" style="--card-bg:#0e1620;--card-border:rgba(100,180,255,0.2);--card-accent:#64b4ff;--card-shadow:rgba(100,180,255,0.3);--card-glow:linear-gradient(135deg,rgba(100,180,255,0.05),transparent);--card-badge-bg:rgba(100,180,255,0.2);--card-badge-text:#64b4ff" onclick="openGame('patterns')">
+    <span class="card-emoji">🔢</span>
+    <span class="card-badge">Logic</span>
+    <div class="card-title">Pattern Detective</div>
+    <p class="card-desc">What comes next in the sequence? Numbers, shapes, colours — train your brain with infinite logic puzzles!</p>
+    <button class="play-btn" style="background:#64b4ff;color:#0d0b1e">▶ Play Now</button>
+  </div>
+
+  <div class="game-card" style="--card-bg:#1a1510;--card-border:rgba(255,200,80,0.2);--card-accent:#ffc850;--card-shadow:rgba(255,200,80,0.3);--card-glow:linear-gradient(135deg,rgba(255,200,80,0.05),transparent);--card-badge-bg:rgba(255,200,80,0.2);--card-badge-text:#ffc850" onclick="openGame('riddles')">
+    <span class="card-emoji">🤔</span>
+    <span class="card-badge">Think!</span>
+    <div class="card-title">Riddle Master</div>
+    <p class="card-desc">Can you solve the riddle? From easy to super tricky! AI creates brand new riddles so it never gets boring!</p>
+    <button class="play-btn" style="background:#ffc850;color:#0d0b1e">▶ Play Now</button>
+  </div>
+
+  <div class="game-card" style="--card-bg:#0e1a1a;--card-border:rgba(80,230,160,0.2);--card-accent:#50e6a0;--card-shadow:rgba(80,230,160,0.3);--card-glow:linear-gradient(135deg,rgba(80,230,160,0.05),transparent);--card-badge-bg:rgba(80,230,160,0.2);--card-badge-text:#50e6a0" onclick="openGame('geography')">
+    <span class="card-emoji">🗺️</span>
+    <span class="card-badge">Geography</span>
+    <div class="card-title">World Explorer</div>
+    <p class="card-desc">Learn about countries, capitals, flags and amazing places around the world! A new adventure every time you play!</p>
+    <button class="play-btn" style="background:#50e6a0;color:#0d0b1e">▶ Play Now</button>
+  </div>
+
+</div>
+
+<footer>Made with 💖 for Sumaiya Sayibah · Have fun learning!</footer>
+
+<!-- All games are embedded in separate pages -->
+<script>
+// Generate starfield
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 150; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const size = Math.random() * 3 + 1;
+  s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${2+Math.random()*4}s;animation-delay:${Math.random()*5}s`;
+  starsEl.appendChild(s);
+}
+
+// Sparkle trail on click
+document.addEventListener('click', e => {
+  const emojis = ['✨','⭐','💫','🌟','🎉','🎊','💥','🌈'];
+  for (let i = 0; i < 4; i++) {
+    const sp = document.createElement('div');
+    sp.className = 'sparkle';
+    sp.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    sp.style.left = (e.clientX - 10 + (Math.random()-0.5)*40) + 'px';
+    sp.style.top  = (e.clientY - 10 + (Math.random()-0.5)*40) + 'px';
+    document.body.appendChild(sp);
+    setTimeout(() => sp.remove(), 800);
+  }
+});
+
+function openGame(name) {
+  window.location.href = name + '.html';
+}
+</script>
+</body>
+</html>

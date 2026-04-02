@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Champion 🌍</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0d0b1e;--card:#0e1e1a;--accent:#4ecdc4;--accent2:#ffd93d;--text:#f0eaff;--muted:#9b8fc4}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+  .back-btn{position:fixed;top:16px;left:16px;background:rgba(255,255,255,0.1);border:none;color:white;padding:10px 18px;border-radius:100px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;text-decoration:none;font-size:0.9rem;z-index:100}
+  h1{font-family:'Fredoka One',cursive;font-size:2.5rem;background:linear-gradient(135deg,#4ecdc4,#ffd93d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:60px 0 6px;text-align:center}
+  .subtitle{color:var(--muted);margin-bottom:30px;text-align:center}
+  .game-box{background:var(--card);border:2px solid rgba(78,205,196,0.2);border-radius:24px;padding:30px 36px;max-width:580px;width:100%}
+  .cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+  .cat-btn{background:rgba(78,205,196,0.08);border:1px solid rgba(78,205,196,0.2);color:var(--text);padding:12px 8px;border-radius:14px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;text-align:center;transition:all 0.2s}
+  .cat-btn.active,.cat-btn:hover{background:var(--accent);border-color:var(--accent);color:#0d0b1e}
+  .diff-row{display:flex;gap:10px;justify-content:center;margin:12px 0}
+  .diff-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--text);padding:8px 20px;border-radius:100px;cursor:pointer;font-weight:700;font-size:0.9rem;transition:all 0.2s}
+  .diff-btn.active,.diff-btn:hover{background:var(--accent);color:#0d0b1e;border-color:var(--accent)}
+  .start-btn{background:linear-gradient(135deg,#4ecdc4,#50e6a0);border:none;color:#0d0b1e;padding:16px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.3rem;cursor:pointer;width:100%;margin-top:8px;transition:transform 0.2s}
+  .start-btn:hover{transform:scale(1.03)}
+  .progress-bar{background:rgba(255,255,255,0.08);border-radius:100px;height:8px;margin-bottom:20px;overflow:hidden}
+  .progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,#4ecdc4,#ffd93d);transition:width 0.5s ease}
+  .score-row{display:flex;justify-content:space-between;gap:10px;margin-bottom:16px}
+  .score-item{background:rgba(78,205,196,0.1);border-radius:12px;padding:10px 12px;flex:1;text-align:center}
+  .score-label{font-size:0.7rem;color:var(--muted);display:block}
+  .score-val{font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--accent)}
+  .q-number{font-size:0.85rem;color:var(--muted);text-align:center;margin-bottom:8px}
+  .question-card{background:rgba(255,255,255,0.04);border-radius:16px;padding:22px;margin-bottom:16px;font-family:'Fredoka One',cursive;font-size:1.25rem;color:white;text-align:center;min-height:80px;display:flex;align-items:center;justify-content:center;line-height:1.4}
+  .options-list{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+  .opt-btn{background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.12);color:var(--text);padding:14px 18px;border-radius:14px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.95rem;text-align:left;transition:all 0.2s;display:flex;align-items:center;gap:12px}
+  .opt-btn:hover:not(:disabled){background:rgba(78,205,196,0.1);border-color:var(--accent)}
+  .opt-letter{display:inline-flex;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.1);align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0}
+  .opt-btn.correct{background:rgba(168,255,120,0.15);border-color:#a8ff78}
+  .opt-btn.correct .opt-letter{background:#a8ff78;color:#0d0b1e}
+  .opt-btn.wrong{background:rgba(255,107,107,0.12);border-color:#ff6b6b}
+  .opt-btn.wrong .opt-letter{background:#ff6b6b;color:white}
+  .opt-btn:disabled{cursor:default}
+  .feedback-row{font-family:'Fredoka One',cursive;font-size:1.4rem;text-align:center;min-height:44px;margin:8px 0}
+  .feedback-row.correct{color:#a8ff78}
+  .feedback-row.wrong{color:#ff6b6b}
+  .explanation-box{background:rgba(78,205,196,0.07);border-left:4px solid var(--accent);padding:12px 16px;border-radius:0 12px 12px 0;font-size:0.9rem;line-height:1.6;margin:10px 0;display:none}
+  .next-btn{background:linear-gradient(135deg,#4ecdc4,#50e6a0);border:none;color:#0d0b1e;padding:14px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.1rem;cursor:pointer;width:100%;margin-top:4px;display:none;transition:transform 0.2s}
+  .next-btn:hover{transform:scale(1.03)}
+  .results-screen{text-align:center;display:none}
+  .results-screen h2{font-family:'Fredoka One',cursive;font-size:2rem;color:var(--accent);margin-bottom:12px}
+  .result-stars{font-size:2.5rem;margin:10px 0}
+  .result-score{font-family:'Fredoka One',cursive;font-size:3.5rem;color:var(--accent2)}
+  .result-detail{color:var(--muted);margin:8px 0;font-size:1rem}
+  .loading-dots::after{content:'...';animation:dots 1.2s steps(3,end) infinite}
+  @keyframes dots{0%,100%{clip-path:inset(0 67% 0 0)}33%{clip-path:inset(0 33% 0 0)}67%{clip-path:inset(0 0% 0 0)}}
+  .start-screen h2{font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--accent);text-align:center;margin-bottom:10px}
+  .start-screen p{color:var(--muted);text-align:center;margin-bottom:14px;line-height:1.6}
+  .timer-ring{font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--accent2)}
+</style>
+</head>
+<body>
+<a href="index.html" class="back-btn">← Home</a>
+<h1>🌍 Quiz Champion</h1>
+<p class="subtitle">Test your knowledge on everything!</p>
+
+<div class="game-box">
+  <div id="startScreen" class="start-screen">
+    <h2>Ready, Champion? 🏆</h2>
+    <p>10 questions per round. AI generates fresh questions every time — you'll never see the same quiz twice!</p>
+    <div class="cat-grid">
+      <button class="cat-btn active" onclick="setCat(this,'general knowledge')">🎓 General</button>
+      <button class="cat-btn" onclick="setCat(this,'animals and nature')">🐾 Animals</button>
+      <button class="cat-btn" onclick="setCat(this,'world geography')">🗺️ Geography</button>
+      <button class="cat-btn" onclick="setCat(this,'space and planets')">🌌 Space</button>
+      <button class="cat-btn" onclick="setCat(this,'history')">📜 History</button>
+      <button class="cat-btn" onclick="setCat(this,'sports')">⚽ Sports</button>
+      <button class="cat-btn" onclick="setCat(this,'food and cooking')">🍕 Food</button>
+      <button class="cat-btn" onclick="setCat(this,'inventions and technology')">💡 Inventions</button>
+      <button class="cat-btn" onclick="setCat(this,'mixed fun topics')">🎲 Mix!</button>
+    </div>
+    <div class="diff-row">
+      <button class="diff-btn active" onclick="setDiff(this,'easy')">😊 Easy</button>
+      <button class="diff-btn" onclick="setDiff(this,'medium')">🔥 Medium</button>
+      <button class="diff-btn" onclick="setDiff(this,'hard')">⚡ Hard</button>
+    </div>
+    <button class="start-btn" onclick="startQuiz()">🚀 Start Quiz!</button>
+  </div>
+
+  <div id="quizScreen" style="display:none">
+    <div class="score-row">
+      <div class="score-item"><span class="score-label">Score</span><span class="score-val" id="score">0</span></div>
+      <div class="score-item"><span class="score-label">Correct</span><span class="score-val" id="correct">0</span></div>
+      <div class="score-item"><span class="score-label">Streak</span><span class="score-val" id="streak">🔥0</span></div>
+    </div>
+    <div class="q-number" id="qnum">Question 1 of 10</div>
+    <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+    <div class="question-card" id="questionCard"><span class="loading-dots">Loading question</span></div>
+    <div class="options-list" id="optionsList"></div>
+    <div class="feedback-row" id="feedback"></div>
+    <div class="explanation-box" id="explBox"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question →</button>
+  </div>
+
+  <div class="results-screen" id="resultsScreen">
+    <h2>Quiz Complete! 🎊</h2>
+    <div class="result-stars" id="resultStars"></div>
+    <div class="result-score" id="resultScore">0</div>
+    <p style="color:var(--muted);font-size:1rem">points</p>
+    <p class="result-detail" id="resultDetail"></p>
+    <button class="start-btn" style="margin-top:20px" onclick="startQuiz()">🔄 Play Again</button>
+    <button class="start-btn" style="background:rgba(255,255,255,0.1);margin-top:10px" onclick="backToStart()">🏠 Change Topic</button>
+  </div>
+</div>
+
+<script>
+let category='general knowledge', difficulty='easy', score=0, qnum=0, correct=0, streak=0;
+const TOTAL_Q=10;
+let questions=[], currentQ=null;
+
+function setCat(btn,c){document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');category=c;}
+function setDiff(btn,d){document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');difficulty=d;}
+
+async function startQuiz(){
+  document.getElementById('startScreen').style.display='none';
+  document.getElementById('resultsScreen').style.display='none';
+  document.getElementById('quizScreen').style.display='block';
+  score=0;qnum=0;correct=0;streak=0;questions=[];
+  document.getElementById('score').textContent='0';
+  document.getElementById('correct').textContent='0';
+  document.getElementById('streak').textContent='🔥0';
+  await loadQuestion();
+}
+
+async function loadQuestion(){
+  qnum++;
+  document.getElementById('qnum').textContent=`Question ${qnum} of ${TOTAL_Q}`;
+  document.getElementById('progFill').style.width=(((qnum-1)/TOTAL_Q)*100)+'%';
+  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('explBox').style.display='none';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('optionsList').innerHTML='';
+  document.getElementById('questionCard').innerHTML='<span class="loading-dots">Loading question</span>';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:400,
+        messages:[{role:'user',content:`Create a ${difficulty} trivia question about "${category}" for an 8-year-old child.
+Return ONLY valid JSON, no markdown:
+{"question":"The question text","options":["Correct answer","Wrong1","Wrong2","Wrong3"],"explanation":"Brief fun explanation of why the answer is correct (1 sentence)"}
+The FIRST option must always be the correct answer. Make it fun and appropriate for age 8.`}]
+      })
+    });
+    const data=await res.json();
+    let txt=data.content[0].text.trim().replace(/```json|```/g,'').trim();
+    currentQ=JSON.parse(txt);
+  } catch(e){
+    currentQ={question:'What is the largest planet in our solar system?',options:['Jupiter','Saturn','Earth','Mars'],explanation:'Jupiter is so big that all other planets could fit inside it!'};
+  }
+
+  document.getElementById('questionCard').textContent=currentQ.question;
+  const opts=currentQ.options.slice();
+  const correct=opts[0];
+  opts.sort(()=>Math.random()-0.5);
+  const letters=['A','B','C','D'];
+  const list=document.getElementById('optionsList');
+  opts.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn';
+    btn.innerHTML=`<span class="opt-letter">${letters[i]}</span>${opt}`;
+    btn.onclick=()=>selectAnswer(btn,opt===correct,currentQ.explanation,correct,list);
+    list.appendChild(btn);
+  });
+}
+
+function selectAnswer(btn,isCorrect,explanation,correctAns,list){
+  Array.from(list.children).forEach(b=>{
+    b.disabled=true;
+    const txt=b.textContent.slice(1);
+    if(txt===correctAns){b.classList.add('correct');b.querySelector('.opt-letter').textContent='✓';}
+    else if(b===btn&&!isCorrect){b.classList.add('wrong');b.querySelector('.opt-letter').textContent='✗';}
+  });
+  const fb=document.getElementById('feedback');
+  if(isCorrect){
+    score+=difficulty==='hard'?30:difficulty==='medium'?20:10;
+    correct++;streak++;
+    document.getElementById('score').textContent=score;
+    document.getElementById('correct').textContent=correct;
+    document.getElementById('streak').textContent='🔥'+streak;
+    fb.className='feedback-row correct';
+    fb.textContent=['⭐ Correct!','🎉 Amazing!','🔥 Brilliant!','✅ Right!'][Math.floor(Math.random()*4)];
+  } else {
+    streak=0;document.getElementById('streak').textContent='🔥0';
+    fb.className='feedback-row wrong';
+    fb.textContent=['❌ Not quite!','💡 Good try!'][Math.floor(Math.random()*2)];
+  }
+  document.getElementById('explBox').textContent='💡 '+explanation;
+  document.getElementById('explBox').style.display='block';
+  document.getElementById('nextBtn').style.display='block';
+  document.getElementById('nextBtn').textContent=qnum<TOTAL_Q?'Next Question →':'See Results!';
+}
+
+function nextQuestion(){
+  if(qnum>=TOTAL_Q){showResults();}
+  else{loadQuestion();}
+}
+
+function showResults(){
+  document.getElementById('quizScreen').style.display='none';
+  document.getElementById('resultsScreen').style.display='block';
+  document.getElementById('resultScore').textContent=score;
+  const pct=Math.round(correct/TOTAL_Q*100);
+  const stars=pct>=90?'⭐⭐⭐':pct>=60?'⭐⭐':'⭐';
+  document.getElementById('resultStars').textContent=stars;
+  document.getElementById('resultDetail').textContent=`You got ${correct}/${TOTAL_Q} correct (${pct}%)!`;
+}
+
+function backToStart(){
+  document.getElementById('resultsScreen').style.display='none';
+  document.getElementById('quizScreen').style.display='none';
+  document.getElementById('startScreen').style.display='block';
+}
+</script>
+</body>
+</html>

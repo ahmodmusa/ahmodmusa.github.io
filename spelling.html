@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Wizard 📝</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0d0b1e;--card:#0e1e3a;--accent:#6bcbff;--accent2:#ffd93d;--text:#f0eaff;--muted:#9b8fc4}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+  .back-btn{position:fixed;top:16px;left:16px;background:rgba(255,255,255,0.1);border:none;color:white;padding:10px 18px;border-radius:100px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;transition:background 0.2s;z-index:100;text-decoration:none}
+  .back-btn:hover{background:rgba(255,255,255,0.2)}
+  h1{font-family:'Fredoka One',cursive;font-size:2.5rem;background:linear-gradient(135deg,#6bcbff,#a8ff78);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:60px 0 6px;text-align:center}
+  .subtitle{color:var(--muted);margin-bottom:30px;font-size:1rem;text-align:center}
+  .game-box{background:var(--card);border:2px solid rgba(107,203,255,0.2);border-radius:24px;padding:36px 40px;max-width:560px;width:100%;text-align:center}
+  .score-row{display:flex;justify-content:space-between;margin-bottom:24px;gap:12px}
+  .score-item{background:rgba(107,203,255,0.1);border-radius:12px;padding:10px 16px;font-weight:700;flex:1}
+  .score-label{font-size:0.75rem;color:var(--muted);display:block;margin-bottom:2px}
+  .score-val{font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--accent)}
+  .word-category{display:inline-block;background:rgba(107,203,255,0.12);border:1px solid rgba(107,203,255,0.3);color:var(--accent);padding:6px 18px;border-radius:100px;font-weight:800;font-size:0.85rem;margin-bottom:16px}
+  .hint-card{background:rgba(255,255,255,0.05);border-radius:16px;padding:20px;margin:16px 0;min-height:80px;font-size:1rem;line-height:1.6;color:var(--text)}
+  .hint-card.loading{display:flex;align-items:center;justify-content:center;color:var(--muted)}
+  .blank-display{font-family:'Fredoka One',cursive;font-size:2.2rem;letter-spacing:8px;color:var(--accent2);margin:16px 0;min-height:60px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px}
+  .blank-letter{display:inline-block;min-width:30px;border-bottom:3px solid var(--accent2);text-align:center;margin:2px}
+  .blank-letter.revealed{color:var(--accent2)}
+  .blank-letter.hidden{color:transparent}
+  .answer-input{background:rgba(255,255,255,0.08);border:2px solid rgba(107,203,255,0.3);border-radius:16px;padding:16px;font-family:'Fredoka One',cursive;font-size:1.6rem;color:white;text-align:center;width:100%;margin-bottom:12px;outline:none;transition:border-color 0.2s;letter-spacing:4px;text-transform:uppercase}
+  .answer-input:focus{border-color:var(--accent)}
+  .btn-row{display:flex;gap:12px}
+  .submit-btn{background:linear-gradient(135deg,#6bcbff,#4da8db);border:none;color:#0d0b1e;padding:14px 30px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.2rem;cursor:pointer;transition:transform 0.2s;flex:1}
+  .submit-btn:hover{transform:scale(1.05)}
+  .hint-btn{background:rgba(255,217,61,0.15);border:1px solid rgba(255,217,61,0.3);color:var(--accent2);padding:14px 20px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;transition:all 0.2s}
+  .hint-btn:hover{background:rgba(255,217,61,0.25)}
+  .feedback{font-family:'Fredoka One',cursive;font-size:1.5rem;min-height:44px;margin:10px 0}
+  .feedback.correct{color:#a8ff78}
+  .feedback.wrong{color:#ff6b6b}
+  .fun-fact{background:rgba(168,255,120,0.08);border-left:4px solid #a8ff78;border-radius:0 12px 12px 0;padding:14px 18px;margin:12px 0;text-align:left;font-size:0.92rem;line-height:1.6;display:none}
+  .fun-fact strong{color:#a8ff78}
+  .loading-dots::after{content:'...';animation:dots 1.2s steps(3,end) infinite}
+  @keyframes dots{0%,100%{clip-path:inset(0 67% 0 0)}33%{clip-path:inset(0 33% 0 0)}67%{clip-path:inset(0 0% 0 0)}}
+  .next-btn{background:linear-gradient(135deg,#a8ff78,#50e6a0);border:none;color:#0d0b1e;padding:14px 40px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.2rem;cursor:pointer;margin-top:12px;transition:transform 0.2s;display:none}
+  .next-btn:hover{transform:scale(1.05)}
+  .start-screen h2{font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--accent);margin-bottom:12px}
+  .start-screen p{color:var(--muted);margin-bottom:20px;line-height:1.6}
+  .start-btn{background:linear-gradient(135deg,#6bcbff,#4da8db);border:none;color:#0d0b1e;padding:16px 48px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.3rem;cursor:pointer;margin-top:8px;transition:transform 0.2s}
+  .start-btn:hover{transform:scale(1.08)}
+  .cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+  .cat-btn{background:rgba(107,203,255,0.1);border:1px solid rgba(107,203,255,0.25);color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;transition:all 0.2s}
+  .cat-btn.active,.cat-btn:hover{background:var(--accent);border-color:var(--accent);color:#0d0b1e}
+</style>
+</head>
+<body>
+<a href="index.html" class="back-btn">← Home</a>
+<h1>📝 Word Wizard</h1>
+<p class="subtitle">Spell your way to victory!</p>
+
+<div class="game-box">
+  <div id="startScreen">
+    <h2>Hello, Wizard! 🧙‍♀️</h2>
+    <p>Pick a category and spell the mystery word! AI gives you a special clue for every word.</p>
+    <div class="cat-grid">
+      <button class="cat-btn active" onclick="setCat(this,'animals')">🐾 Animals</button>
+      <button class="cat-btn" onclick="setCat(this,'nature')">🌿 Nature</button>
+      <button class="cat-btn" onclick="setCat(this,'food')">🍕 Food</button>
+      <button class="cat-btn" onclick="setCat(this,'science')">🔬 Science</button>
+      <button class="cat-btn" onclick="setCat(this,'places')">🌍 Places</button>
+      <button class="cat-btn" onclick="setCat(this,'mixed')">🎲 Mixed</button>
+    </div>
+    <button class="start-btn" onclick="startGame()">✨ Start Spelling!</button>
+  </div>
+
+  <div id="gameScreen" style="display:none">
+    <div class="score-row">
+      <div class="score-item"><span class="score-label">Score</span><span class="score-val" id="score">0</span></div>
+      <div class="score-item"><span class="score-label">Word</span><span class="score-val" id="wordNum">1</span></div>
+      <div class="score-item"><span class="score-label">Streak</span><span class="score-val" id="streak">🔥0</span></div>
+    </div>
+
+    <div class="word-category" id="categoryBadge">Animals</div>
+    <div class="hint-card" id="hintCard"><span class="loading-dots">Loading your clue</span></div>
+    <div class="blank-display" id="blankDisplay"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="fun-fact" id="funFact"></div>
+    <input type="text" class="answer-input" id="answerInput" placeholder="TYPE HERE" autocomplete="off" onkeydown="if(event.key==='Enter')checkSpelling()">
+    <div class="btn-row">
+      <button class="submit-btn" onclick="checkSpelling()">✓ Check!</button>
+      <button class="hint-btn" onclick="revealLetter()">💡 Hint</button>
+    </div>
+    <button class="next-btn" id="nextBtn" onclick="loadWord()">Next Word →</button>
+  </div>
+</div>
+
+<script>
+const WORDS = {
+  animals:['elephant','giraffe','dolphin','penguin','butterfly','crocodile','flamingo','cheetah','octopus','rhinoceros','kangaroo','hamster','porcupine','chimpanzee','salamander'],
+  nature:['rainbow','volcano','glacier','tornado','lightning','blizzard','waterfall','desert','mountain','hurricane','earthquake','ecosystem','photosynthesis','atmosphere','constellation'],
+  food:['spaghetti','croissant','broccoli','avocado','cinnamon','pineapple','chocolate','cauliflower','strawberry','asparagus','cucumber','blueberry','hamburger','tortilla','enchilada'],
+  science:['gravity','magnet','oxygen','nucleus','energy','friction','molecule','erosion','bacteria','asteroid','telescope','microscope','hypothesis','ecosystem','laboratory'],
+  places:['Malaysia','Australia','Antarctica','Mediterranean','Sahara','Himalayas','Amazon','Caribbean','Iceland','Singapore','Jerusalem','Barcelona','Vancouver','Istanbul','Zimbabwe'],
+  mixed:['adventure','champion','discovery','excellent','imagination','knowledge','wonderful','beautiful','mysterious','celebrate','important','dangerous','underneath','favourite','impossible']
+};
+
+let currentCategory='animals', currentWord='', score=0, wordNum=0, streak=0, hintsUsed=0, revealedCount=0;
+
+function setCat(btn,cat){
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentCategory=cat;
+}
+
+function startGame(){
+  document.getElementById('startScreen').style.display='none';
+  document.getElementById('gameScreen').style.display='block';
+  loadWord();
+}
+
+async function loadWord(){
+  hintsUsed=0; revealedCount=0;
+  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('funFact').style.display='none';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('answerInput').value='';
+  document.getElementById('answerInput').disabled=false;
+  
+  const pool = currentCategory==='mixed' ? Object.values(WORDS).flat() : WORDS[currentCategory]||WORDS.animals;
+  currentWord = pool[Math.floor(Math.random()*pool.length)];
+  wordNum++;
+  
+  document.getElementById('wordNum').textContent=wordNum;
+  document.getElementById('categoryBadge').textContent = {animals:'🐾 Animals',nature:'🌿 Nature',food:'🍕 Food',science:'🔬 Science',places:'🌍 Places',mixed:'🎲 Mixed'}[currentCategory]||currentCategory;
+  
+  // Show blanks
+  renderBlanks([]);
+  
+  // Fetch AI clue
+  document.getElementById('hintCard').innerHTML='<span class="loading-dots">Getting your clue</span>';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:200,
+        messages:[{role:'user',content:`Give a fun, age-appropriate clue for an 8-year-old to guess the word "${currentWord}". Keep it to 1-2 short sentences. Don't say the word. Be playful and exciting! No quotes, no labels, just the clue.`}]
+      })
+    });
+    const data = await res.json();
+    const clue = data.content[0].text;
+    document.getElementById('hintCard').textContent = clue;
+  } catch(e) {
+    document.getElementById('hintCard').textContent = `This word has ${currentWord.length} letters. Can you figure it out?`;
+  }
+  document.getElementById('answerInput').focus();
+}
+
+function renderBlanks(revealed){
+  const d = document.getElementById('blankDisplay');
+  d.innerHTML = '';
+  for(let i=0;i<currentWord.length;i++){
+    const span = document.createElement('span');
+    span.className = 'blank-letter';
+    if(revealed.includes(i)){
+      span.textContent = currentWord[i].toUpperCase();
+      span.classList.add('revealed');
+    } else {
+      span.textContent = currentWord[i].toUpperCase();
+      span.classList.add('hidden');
+    }
+    d.appendChild(span);
+  }
+}
+
+function revealLetter(){
+  if(revealedCount >= Math.floor(currentWord.length/2)) return;
+  const hidden = [];
+  for(let i=0;i<currentWord.length;i++) if(!document.getElementById('blankDisplay').children[i].classList.contains('revealed')) hidden.push(i);
+  if(!hidden.length) return;
+  const idx = hidden[Math.floor(Math.random()*hidden.length)];
+  const revealedNow = [];
+  for(let i=0;i<currentWord.length;i++) if(document.getElementById('blankDisplay').children[i].classList.contains('revealed')) revealedNow.push(i);
+  revealedNow.push(idx);
+  renderBlanks(revealedNow);
+  revealedCount++;
+  hintsUsed++;
+}
+
+async function checkSpelling(){
+  const answer = document.getElementById('answerInput').value.trim().toLowerCase();
+  if(!answer) return;
+  const fb = document.getElementById('feedback');
+  
+  if(answer === currentWord){
+    const pts = Math.max(10 - hintsUsed*3, 4);
+    score += pts; streak++;
+    document.getElementById('score').textContent=score;
+    document.getElementById('streak').textContent='🔥'+streak;
+    fb.className='feedback correct';
+    fb.textContent=['🎉 Correct! +'+pts+' pts','⭐ Brilliant! +'+pts,'✅ Nailed it! +'+pts][Math.floor(Math.random()*3)];
+    renderBlanks([...Array(currentWord.length).keys()]);
+    document.getElementById('answerInput').disabled=true;
+    document.getElementById('nextBtn').style.display='block';
+    
+    // Fun fact
+    document.getElementById('funFact').style.display='block';
+    document.getElementById('funFact').innerHTML='<strong>✨ Fun fact loading...</strong>';
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:120,messages:[{role:'user',content:`Tell one fun, amazing fact about "${currentWord}" for an 8-year-old. One sentence, exciting, start with an emoji!`}]})
+      });
+      const d = await res.json();
+      document.getElementById('funFact').innerHTML='<strong>Fun Fact! </strong>'+d.content[0].text;
+    } catch(e){ document.getElementById('funFact').innerHTML=`<strong>Fun Fact! </strong>The word "${currentWord}" has ${currentWord.length} letters!`; }
+  } else {
+    streak=0; hintsUsed++;
+    document.getElementById('streak').textContent='🔥0';
+    fb.className='feedback wrong';
+    fb.textContent=['❌ Try again!','💪 So close! Try again!','🤔 Not quite!'][Math.floor(Math.random()*3)];
+  }
+}
+</script>
+</body>
+</html>

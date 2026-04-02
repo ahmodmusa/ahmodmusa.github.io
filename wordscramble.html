@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Scramble 🔤</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0d0b1e;--card:#1a0e10;--accent:#ff9a3c;--accent2:#ffd93d;--text:#f0eaff;--muted:#9b8fc4}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+  .back-btn{position:fixed;top:16px;left:16px;background:rgba(255,255,255,0.1);border:none;color:white;padding:10px 18px;border-radius:100px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;text-decoration:none;font-size:0.9rem;z-index:100}
+  h1{font-family:'Fredoka One',cursive;font-size:2.5rem;background:linear-gradient(135deg,#ff9a3c,#ffd93d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:60px 0 6px;text-align:center}
+  .subtitle{color:var(--muted);margin-bottom:30px;text-align:center}
+  .game-box{background:var(--card);border:2px solid rgba(255,154,60,0.2);border-radius:24px;padding:30px 36px;max-width:540px;width:100%}
+  .score-row{display:flex;justify-content:space-between;gap:10px;margin-bottom:20px}
+  .score-item{background:rgba(255,154,60,0.1);border-radius:12px;padding:10px 12px;flex:1;text-align:center}
+  .score-label{font-size:0.7rem;color:var(--muted);display:block}
+  .score-val{font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--accent)}
+  .category-badge{display:inline-block;background:rgba(255,154,60,0.12);border:1px solid rgba(255,154,60,0.3);color:var(--accent);padding:4px 16px;border-radius:100px;font-size:0.8rem;font-weight:800;margin-bottom:14px}
+  .clue-box{background:rgba(255,255,255,0.04);border-radius:14px;padding:16px 20px;margin-bottom:16px;font-size:1rem;line-height:1.6;text-align:center;min-height:60px;display:flex;align-items:center;justify-content:center}
+  .scramble-display{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:20px 0;min-height:70px;align-items:center}
+  .letter-tile{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;background:linear-gradient(135deg,rgba(255,154,60,0.2),rgba(255,217,61,0.1));border:2px solid rgba(255,154,60,0.35);border-radius:12px;font-family:'Fredoka One',cursive;font-size:1.8rem;color:white;cursor:pointer;transition:all 0.2s;user-select:none}
+  .letter-tile:hover{background:rgba(255,154,60,0.35);transform:translateY(-4px)}
+  .letter-tile.used{opacity:0.3;cursor:default;transform:none}
+  .answer-tiles{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:16px 0;min-height:58px;align-items:center}
+  .answer-slot{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:12px;border:2px dashed rgba(255,154,60,0.3);font-family:'Fredoka One',cursive;font-size:1.8rem;color:white;transition:all 0.2s;cursor:pointer}
+  .answer-slot.filled{background:rgba(255,154,60,0.15);border:2px solid rgba(255,154,60,0.5);border-style:solid}
+  .answer-slot:hover.filled{background:rgba(255,107,107,0.2);border-color:#ff6b6b}
+  .btn-row{display:flex;gap:10px;margin-top:12px}
+  .submit-btn{background:linear-gradient(135deg,#ff9a3c,#ff6b2b);border:none;color:white;padding:14px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.2rem;cursor:pointer;flex:2;transition:transform 0.2s}
+  .submit-btn:hover{transform:scale(1.04)}
+  .hint-btn{background:rgba(255,217,61,0.12);border:1px solid rgba(255,217,61,0.3);color:var(--accent2);padding:14px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;flex:1;transition:all 0.2s}
+  .hint-btn:hover{background:rgba(255,217,61,0.22)}
+  .clear-btn{background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.25);color:#ff6b6b;padding:14px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;flex:1}
+  .feedback{font-family:'Fredoka One',cursive;font-size:1.5rem;text-align:center;min-height:44px;margin:10px 0}
+  .feedback.correct{color:#a8ff78}
+  .feedback.wrong{color:#ff6b6b}
+  .fun-fact{background:rgba(255,154,60,0.07);border-left:4px solid var(--accent);padding:12px 16px;border-radius:0 12px 12px 0;font-size:0.92rem;line-height:1.6;margin:10px 0;display:none}
+  .next-btn{background:linear-gradient(135deg,#ff9a3c,#ffd93d);border:none;color:#0d0b1e;padding:14px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.1rem;cursor:pointer;width:100%;margin-top:10px;display:none}
+  .cat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:14px 0}
+  .cat-btn{background:rgba(255,154,60,0.08);border:1px solid rgba(255,154,60,0.2);color:var(--text);padding:10px 6px;border-radius:12px;cursor:pointer;font-weight:700;font-size:0.82rem;text-align:center;transition:all 0.2s}
+  .cat-btn.active,.cat-btn:hover{background:var(--accent);border-color:var(--accent);color:#0d0b1e}
+  .start-btn{background:linear-gradient(135deg,#ff9a3c,#ffd93d);border:none;color:#0d0b1e;padding:16px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.3rem;cursor:pointer;width:100%;margin-top:10px}
+  .start-screen h2{font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--accent);text-align:center;margin-bottom:10px}
+  .start-screen p{color:var(--muted);text-align:center;margin-bottom:14px;line-height:1.6}
+  .loading-dots::after{content:'...';animation:dots 1.2s steps(3,end) infinite}
+  @keyframes dots{0%,100%{clip-path:inset(0 67% 0 0)}33%{clip-path:inset(0 33% 0 0)}67%{clip-path:inset(0 0% 0 0)}}
+</style>
+</head>
+<body>
+<a href="index.html" class="back-btn">← Home</a>
+<h1>🔤 Word Scramble</h1>
+<p class="subtitle">Unscramble the hidden word!</p>
+
+<div class="game-box">
+  <div id="startScreen" class="start-screen">
+    <h2>Scramble Time! 🌀</h2>
+    <p>Letters are all mixed up — can you put them back in order? AI gives a clue for every word!</p>
+    <div class="cat-grid">
+      <button class="cat-btn active" onclick="setCat(this,'animals')">🐾 Animals</button>
+      <button class="cat-btn" onclick="setCat(this,'fruits and vegetables')">🍎 Food</button>
+      <button class="cat-btn" onclick="setCat(this,'countries')">🌍 Countries</button>
+      <button class="cat-btn" onclick="setCat(this,'sports')">⚽ Sports</button>
+      <button class="cat-btn" onclick="setCat(this,'science words')">🔬 Science</button>
+      <button class="cat-btn" onclick="setCat(this,'mixed')">🎲 Mixed!</button>
+    </div>
+    <button class="start-btn" onclick="startGame()">🔀 Scramble!</button>
+  </div>
+
+  <div id="gameScreen" style="display:none">
+    <div class="score-row">
+      <div class="score-item"><span class="score-label">Score</span><span class="score-val" id="score">0</span></div>
+      <div class="score-item"><span class="score-label">Words</span><span class="score-val" id="wordCount">1</span></div>
+      <div class="score-item"><span class="score-label">Streak</span><span class="score-val" id="streak">🔥0</span></div>
+    </div>
+    <div class="category-badge" id="catBadge">Animals</div>
+    <div class="clue-box" id="clueBox"><span class="loading-dots">Loading clue</span></div>
+    <div class="scramble-display" id="scrambleDisplay"></div>
+    <div style="text-align:center;color:var(--muted);font-size:0.85rem;margin:-8px 0 8px">↑ Tap letters to spell the word ↑</div>
+    <div class="answer-tiles" id="answerTiles"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="fun-fact" id="funFact"></div>
+    <div class="btn-row">
+      <button class="submit-btn" onclick="checkAnswer()">✓ Check!</button>
+      <button class="hint-btn" onclick="giveHint()">💡 Hint</button>
+      <button class="clear-btn" onclick="clearAnswer()">✗</button>
+    </div>
+    <button class="next-btn" id="nextBtn" onclick="loadWord()">Next Word →</button>
+  </div>
+</div>
+
+<script>
+const WORD_BANKS = {
+  animals:['elephant','giraffe','penguin','dolphin','cheetah','flamingo','crocodile','butterfly','rhinoceros','kangaroo','hamster','octopus','chimpanzee','porcupine'],
+  'fruits and vegetables':['avocado','broccoli','pineapple','strawberry','blueberry','watermelon','pumpkin','spinach','mango','papaya','cauliflower','asparagus'],
+  countries:['malaysia','australia','singapore','germany','argentina','portugal','indonesia','vietnam','thailand','netherlands','switzerland','philippines'],
+  sports:['football','swimming','gymnastics','volleyball','badminton','basketball','skateboard','archery','wrestling','trampoline'],
+  'science words':['gravity','molecule','friction','nucleus','energy','magnet','erosion','bacteria','asteroid','telescope','microscope','ecosystem'],
+  mixed:['adventure','imagination','discovery','beautiful','wonderful','champion','knowledge','celebrate','important','mysterious','favourite']
+};
+
+let category='animals', score=0, wordCount=0, streak=0, currentWord='', scrambled='', answer=[], tileEls=[], hintCount=0;
+
+function setCat(btn,c){document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');category=c;}
+
+function scrambleWord(w){
+  const a=w.split('');
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a.join('')===w&&w.length>1?scrambleWord(w):a.join('');
+}
+
+function startGame(){
+  document.getElementById('startScreen').style.display='none';
+  document.getElementById('gameScreen').style.display='block';
+  loadWord();
+}
+
+async function loadWord(){
+  hintCount=0;answer=[];
+  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('funFact').style.display='none';
+  document.getElementById('feedback').textContent='';
+  wordCount++;
+  document.getElementById('wordCount').textContent=wordCount;
+
+  const pool=category==='mixed'?Object.values(WORD_BANKS).flat():WORD_BANKS[category]||WORD_BANKS.animals;
+  currentWord=pool[Math.floor(Math.random()*pool.length)];
+  scrambled=scrambleWord(currentWord);
+
+  document.getElementById('catBadge').textContent={animals:'🐾 Animals','fruits and vegetables':'🍎 Fruits & Veg',countries:'🌍 Countries',sports:'⚽ Sports','science words':'🔬 Science',mixed:'🎲 Mixed'}[category]||category;
+  document.getElementById('clueBox').innerHTML='<span class="loading-dots">Getting clue</span>';
+
+  // Render scrambled tiles
+  const disp=document.getElementById('scrambleDisplay');
+  disp.innerHTML='';
+  tileEls=[];
+  scrambled.split('').forEach((l,i)=>{
+    const t=document.createElement('div');
+    t.className='letter-tile';
+    t.textContent=l.toUpperCase();
+    t.dataset.idx=i;
+    t.dataset.letter=l;
+    t.onclick=()=>addLetter(t);
+    disp.appendChild(t);
+    tileEls.push(t);
+  });
+
+  renderAnswer();
+
+  try {
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:100,messages:[{role:'user',content:`Give a short, fun clue for the word "${currentWord}" for an 8-year-old. 1 sentence only. Don't say the word. Start with an emoji.`}]})
+    });
+    const d=await res.json();
+    document.getElementById('clueBox').textContent=d.content[0].text;
+  } catch(e){
+    document.getElementById('clueBox').textContent=`This word has ${currentWord.length} letters. Can you unscramble it?`;
+  }
+}
+
+function renderAnswer(){
+  const slots=document.getElementById('answerTiles');
+  slots.innerHTML='';
+  for(let i=0;i<currentWord.length;i++){
+    const s=document.createElement('div');
+    s.className='answer-slot'+(answer[i]?' filled':'');
+    s.textContent=answer[i]?answer[i].letter.toUpperCase():'';
+    if(answer[i]){
+      const idx=i;
+      s.onclick=()=>removeLetter(idx);
+    }
+    slots.appendChild(s);
+  }
+}
+
+function addLetter(tile){
+  if(tile.classList.contains('used')||answer.length>=currentWord.length) return;
+  const pos=answer.length;
+  answer.push({letter:tile.dataset.letter,tileIdx:parseInt(tile.dataset.idx)});
+  tile.classList.add('used');
+  renderAnswer();
+}
+
+function removeLetter(pos){
+  if(pos>=answer.length) return;
+  const removed=answer[pos];
+  tileEls[removed.tileIdx].classList.remove('used');
+  answer.splice(pos,1);
+  renderAnswer();
+}
+
+function clearAnswer(){
+  answer=[];
+  tileEls.forEach(t=>t.classList.remove('used'));
+  renderAnswer();
+}
+
+function giveHint(){
+  if(hintCount>=Math.floor(currentWord.length/2)) return;
+  // Place the next correct letter
+  const correctPos=hintCount;
+  clearAnswer();
+  answer=[{letter:currentWord[correctPos],tileIdx:scrambled.indexOf(currentWord[correctPos])}];
+  // Mark that tile used
+  let found=false;
+  tileEls.forEach(t=>{if(!found&&t.dataset.letter===currentWord[correctPos]&&!t.classList.contains('used')){t.classList.add('used');found=true;}});
+  hintCount++;
+  renderAnswer();
+}
+
+async function checkAnswer(){
+  const typed=answer.map(a=>a.letter).join('');
+  const fb=document.getElementById('feedback');
+  if(typed.length<currentWord.length){fb.className='feedback wrong';fb.textContent='Fill in all the letters first! 😊';return;}
+  if(typed===currentWord){
+    const pts=Math.max(20-hintCount*5,5);
+    score+=pts;streak++;
+    document.getElementById('score').textContent=score;
+    document.getElementById('streak').textContent='🔥'+streak;
+    fb.className='feedback correct';
+    fb.textContent=['🎉 Correct! +'+pts,'⭐ Amazing! +'+pts,'🔥 Nailed it! +'+pts][Math.floor(Math.random()*3)];
+    // Reveal correct tiles
+    tileEls.forEach(t=>t.classList.add('used'));
+    document.getElementById('nextBtn').style.display='block';
+    // Fun fact
+    document.getElementById('funFact').style.display='block';
+    document.getElementById('funFact').textContent='✨ Loading fun fact...';
+    try {
+      const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:100,messages:[{role:'user',content:`One amazing fun fact about "${currentWord}" for an 8-year-old. 1 sentence. Start with an emoji.`}]})});
+      const d=await res.json();
+      document.getElementById('funFact').innerHTML='<strong>Fun Fact! </strong>'+d.content[0].text;
+    } catch(e){document.getElementById('funFact').textContent=`✨ "${currentWord}" has ${currentWord.length} letters!`;}
+  } else {
+    streak=0;hintCount++;
+    document.getElementById('streak').textContent='🔥0';
+    fb.className='feedback wrong';
+    fb.textContent=['❌ Not right, try again!','💪 So close! Keep going!','🤔 Mix them up differently!'][Math.floor(Math.random()*3)];
+    setTimeout(()=>{clearAnswer();},400);
+  }
+}
+</script>
+</body>
+</html>

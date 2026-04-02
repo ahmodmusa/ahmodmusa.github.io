@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pattern Detective 🔢</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0d0b1e;--card:#0e1620;--accent:#64b4ff;--accent2:#ffd93d;--text:#f0eaff;--muted:#9b8fc4}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+  .back-btn{position:fixed;top:16px;left:16px;background:rgba(255,255,255,0.1);border:none;color:white;padding:10px 18px;border-radius:100px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;text-decoration:none;font-size:0.9rem;z-index:100}
+  h1{font-family:'Fredoka One',cursive;font-size:2.5rem;background:linear-gradient(135deg,#64b4ff,#c878ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:60px 0 6px;text-align:center}
+  .subtitle{color:var(--muted);margin-bottom:30px;text-align:center}
+  .game-box{background:var(--card);border:2px solid rgba(100,180,255,0.2);border-radius:24px;padding:30px 36px;max-width:560px;width:100%}
+  .score-row{display:flex;justify-content:space-between;gap:10px;margin-bottom:20px}
+  .score-item{background:rgba(100,180,255,0.1);border-radius:12px;padding:10px 12px;flex:1;text-align:center}
+  .score-label{font-size:0.7rem;color:var(--muted);display:block}
+  .score-val{font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--accent)}
+  .level-info{text-align:center;margin-bottom:12px}
+  .level-badge{display:inline-block;background:rgba(100,180,255,0.12);border:1px solid rgba(100,180,255,0.3);color:var(--accent);padding:4px 16px;border-radius:100px;font-size:0.8rem;font-weight:800}
+  .pattern-type{color:var(--muted);font-size:0.85rem;margin-top:4px}
+  .pattern-row{display:flex;align-items:center;justify-content:center;gap:10px;margin:24px 0;flex-wrap:wrap}
+  .pattern-tile{display:inline-flex;align-items:center;justify-content:center;border-radius:14px;font-family:'Fredoka One',cursive;font-size:1.5rem;padding:14px 18px;min-width:56px;text-align:center;transition:all 0.3s;background:rgba(100,180,255,0.1);border:2px solid rgba(100,180,255,0.25);color:white}
+  .pattern-tile.question{background:rgba(255,217,61,0.12);border:2px dashed rgba(255,217,61,0.5);color:var(--accent2)}
+  .arrow{color:var(--muted);font-size:1.2rem;font-weight:800}
+  .options-row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:16px 0}
+  .opt-btn{background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.12);color:var(--text);padding:16px;border-radius:14px;cursor:pointer;font-family:'Fredoka One',cursive;font-size:1.4rem;transition:all 0.2s;text-align:center}
+  .opt-btn:hover:not(:disabled){background:rgba(100,180,255,0.12);border-color:var(--accent);transform:scale(1.04)}
+  .opt-btn.correct{background:rgba(168,255,120,0.15);border-color:#a8ff78;color:#a8ff78}
+  .opt-btn.wrong{background:rgba(255,107,107,0.12);border-color:#ff6b6b;color:#ff6b6b}
+  .feedback{font-family:'Fredoka One',cursive;font-size:1.5rem;text-align:center;min-height:44px;margin:10px 0}
+  .feedback.correct{color:#a8ff78}
+  .feedback.wrong{color:#ff6b6b}
+  .explanation{background:rgba(100,180,255,0.07);border-left:4px solid var(--accent);padding:12px 16px;border-radius:0 12px 12px 0;font-size:0.92rem;line-height:1.6;margin:10px 0;display:none}
+  .next-btn{background:linear-gradient(135deg,#64b4ff,#a879ff);border:none;color:white;padding:14px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.1rem;cursor:pointer;width:100%;margin-top:10px;display:none}
+  .diff-row{display:flex;gap:10px;justify-content:center;margin:14px 0}
+  .diff-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--text);padding:8px 20px;border-radius:100px;cursor:pointer;font-weight:700;font-size:0.9rem;transition:all 0.2s}
+  .diff-btn.active,.diff-btn:hover{background:var(--accent);color:#0d0b1e;border-color:var(--accent)}
+  .start-btn{background:linear-gradient(135deg,#64b4ff,#a879ff);border:none;color:white;padding:16px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.3rem;cursor:pointer;width:100%;margin-top:10px}
+  .start-screen h2{font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--accent);text-align:center;margin-bottom:10px}
+  .start-screen p{color:var(--muted);text-align:center;margin-bottom:14px;line-height:1.6}
+  .type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+  .type-btn{background:rgba(100,180,255,0.08);border:1px solid rgba(100,180,255,0.2);color:var(--text);padding:10px;border-radius:12px;cursor:pointer;font-weight:700;font-size:0.85rem;text-align:center;transition:all 0.2s}
+  .type-btn.active,.type-btn:hover{background:var(--accent);border-color:var(--accent);color:#0d0b1e}
+</style>
+</head>
+<body>
+<a href="index.html" class="back-btn">← Home</a>
+<h1>🔢 Pattern Detective</h1>
+<p class="subtitle">Find what comes next!</p>
+
+<div class="game-box">
+  <div id="startScreen" class="start-screen">
+    <h2>Think like a detective! 🕵️‍♀️</h2>
+    <p>Look at the pattern carefully. What number, shape, or emoji comes next? Train your logical brain!</p>
+    <div class="type-grid">
+      <button class="type-btn active" onclick="setType(this,'numbers')">🔢 Numbers</button>
+      <button class="type-btn" onclick="setType(this,'emoji')">😀 Emojis</button>
+      <button class="type-btn" onclick="setType(this,'mixed')">🎲 Mixed</button>
+      <button class="type-btn" onclick="setType(this,'shapes')">🔷 Shapes</button>
+    </div>
+    <div class="diff-row">
+      <button class="diff-btn active" onclick="setDiff(this,'easy')">😊 Easy</button>
+      <button class="diff-btn" onclick="setDiff(this,'medium')">🔥 Medium</button>
+      <button class="diff-btn" onclick="setDiff(this,'hard')">⚡ Hard</button>
+    </div>
+    <button class="start-btn" onclick="startGame()">🔍 Start Detecting!</button>
+  </div>
+
+  <div id="gameScreen" style="display:none">
+    <div class="score-row">
+      <div class="score-item"><span class="score-label">Score</span><span class="score-val" id="score">0</span></div>
+      <div class="score-item"><span class="score-label">Puzzle</span><span class="score-val" id="pnum">1</span></div>
+      <div class="score-item"><span class="score-label">Streak</span><span class="score-val" id="streak">🔥0</span></div>
+    </div>
+    <div class="level-info">
+      <div class="level-badge" id="levelBadge">Number Patterns</div>
+      <div class="pattern-type" id="patternDesc">What comes next?</div>
+    </div>
+    <div class="pattern-row" id="patternRow"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="explanation" id="explanation"></div>
+    <div class="options-row" id="optionsRow"></div>
+    <button class="next-btn" id="nextBtn" onclick="loadPuzzle()">Next Puzzle →</button>
+  </div>
+</div>
+
+<script>
+let ptype='numbers', difficulty='easy', score=0, pnum=0, streak=0, correctAnswer='';
+
+function setType(btn,t){document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');ptype=t;}
+function setDiff(btn,d){document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');difficulty=d;}
+
+function startGame(){document.getElementById('startScreen').style.display='none';document.getElementById('gameScreen').style.display='block';loadPuzzle();}
+
+function generateNumberPattern(){
+  const types=['add','multiply','fibonacci','subtract','double'];
+  const t=types[Math.floor(Math.random()*types.length)];
+  let seq=[],rule='',ans;
+  const easyStart=()=>Math.floor(Math.random()*10)+1;
+  const medStart=()=>Math.floor(Math.random()*20)+1;
+  
+  if(t==='add'){
+    const step=difficulty==='easy'?Math.floor(Math.random()*5)+1:difficulty==='medium'?Math.floor(Math.random()*10)+2:Math.floor(Math.random()*20)+5;
+    const start=difficulty==='easy'?easyStart():medStart();
+    seq=[start,start+step,start+step*2,start+step*3,start+step*4];
+    rule=`Add ${step} each time`;
+  } else if(t==='subtract'){
+    const step=Math.floor(Math.random()*5)+1;
+    const start=(difficulty==='easy'?20:50)+step*4;
+    seq=[start,start-step,start-step*2,start-step*3,start-step*4];
+    rule=`Subtract ${step} each time`;
+  } else if(t==='multiply'){
+    const m=difficulty==='easy'?2:difficulty==='medium'?[2,3][Math.floor(Math.random()*2)]:Math.floor(Math.random()*3)+2;
+    const start=1;
+    seq=[start,start*m,start*m*m,start*m*m*m,start*m*m*m*m];
+    rule=`Multiply by ${m} each time`;
+  } else if(t==='double'){
+    const start=Math.floor(Math.random()*5)+1;
+    seq=[start,start*2,start*4,start*8,start*16];
+    rule='Double each time';
+  } else {
+    seq=[1,1,2,3,5,8,13];
+    seq=seq.slice(0,5);
+    rule='Add the two previous numbers';
+  }
+  
+  ans=seq[seq.length-1];
+  const shown=seq.slice(0,-1);
+  const wrongs=[ans+seq[1],ans-seq[1],ans*2,ans+1,ans-2,ans+5].filter(w=>w!==ans&&w>0).slice(0,3);
+  const opts=[String(ans),...wrongs.map(String)].sort(()=>Math.random()-0.5);
+  return {sequence:shown.map(String),answer:String(ans),options:opts,rule};
+}
+
+const EMOJI_PATTERNS=[
+  {seq:['🌟','⭐','🌟','⭐','🌟'],ans:'⭐',rule:'Alternating star and star'},
+  {seq:['🐶','🐱','🐶','🐱','🐶'],ans:'🐱',rule:'Alternating dog and cat'},
+  {seq:['🔴','🔵','🟡','🔴','🔵'],ans:'🟡',rule:'Red, Blue, Yellow pattern'},
+  {seq:['😀','😀','😢','😀','😀'],ans:'😢',rule:'Two happy, one sad pattern'},
+  {seq:['🌙','🌙','☀️','🌙','🌙'],ans:'☀️',rule:'Two moons, one sun'},
+  {seq:['🍎','🍊','🍋','🍎','🍊'],ans:'🍋',rule:'Apple, Orange, Lemon repeating'},
+  {seq:['⬆️','➡️','⬇️','⬅️','⬆️'],ans:'➡️',rule:'Up, Right, Down, Left rotating'},
+  {seq:['🌸','🌸','🌺','🌸','🌸'],ans:'🌺',rule:'Two blossoms, one flower'},
+];
+
+function generateEmojiPattern(){
+  const p=EMOJI_PATTERNS[Math.floor(Math.random()*EMOJI_PATTERNS.length)];
+  const allEmojis=['🌟','⭐','🐶','🐱','🔴','🔵','🟡','😀','😢','🌙','☀️','🍎','🍊','🍋','⬆️','➡️','⬇️','⬅️','🌸','🌺','🎵','🎶','❤️','💙','💛'];
+  const wrongs=allEmojis.filter(e=>e!==p.ans).sort(()=>Math.random()-0.5).slice(0,3);
+  const opts=[p.ans,...wrongs].sort(()=>Math.random()-0.5);
+  return{sequence:p.seq,answer:p.ans,options:opts,rule:p.rule};
+}
+
+function loadPuzzle(){
+  pnum++;
+  document.getElementById('pnum').textContent=pnum;
+  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('explanation').style.display='none';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('optionsRow').innerHTML='';
+
+  let puzzle;
+  if(ptype==='numbers') puzzle=generateNumberPattern();
+  else if(ptype==='emoji') puzzle=generateEmojiPattern();
+  else puzzle=pnum%2===0?generateEmojiPattern():generateNumberPattern();
+
+  correctAnswer=puzzle.answer;
+  document.getElementById('levelBadge').textContent=ptype==='numbers'?'🔢 Number Pattern':ptype==='emoji'?'😀 Emoji Pattern':'🎲 Mixed Pattern';
+  document.getElementById('patternDesc').textContent='What comes next? 🤔';
+
+  // Render pattern
+  const row=document.getElementById('patternRow');
+  row.innerHTML='';
+  puzzle.sequence.forEach((item,i)=>{
+    const t=document.createElement('div');
+    t.className='pattern-tile';
+    t.textContent=item;
+    row.appendChild(t);
+    if(i<puzzle.sequence.length-1){const a=document.createElement('div');a.className='arrow';a.textContent='→';row.appendChild(a);}
+  });
+  const arr=document.createElement('div');arr.className='arrow';arr.textContent='→';row.appendChild(arr);
+  const q=document.createElement('div');q.className='pattern-tile question';q.textContent='?';row.appendChild(q);
+
+  // Options
+  const opts=document.getElementById('optionsRow');
+  puzzle.options.forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn';
+    btn.textContent=opt;
+    btn.onclick=()=>selectAnswer(btn,opt===correctAnswer,puzzle.rule,opts);
+    opts.appendChild(btn);
+  });
+}
+
+function selectAnswer(btn,isCorrect,rule,opts){
+  Array.from(opts.children).forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===correctAnswer) b.classList.add('correct');
+    else if(b===btn&&!isCorrect) b.classList.add('wrong');
+  });
+  // Update the ? tile
+  document.querySelectorAll('.pattern-tile.question').forEach(t=>{t.textContent=correctAnswer;t.classList.remove('question');if(isCorrect)t.style.color='#a8ff78';});
+  const fb=document.getElementById('feedback');
+  if(isCorrect){
+    score+=15;streak++;
+    document.getElementById('score').textContent=score;document.getElementById('streak').textContent='🔥'+streak;
+    fb.className='feedback correct';fb.textContent=['⭐ Correct!','🎉 You cracked it!','🔥 Pattern genius!','✅ Exactly right!'][Math.floor(Math.random()*4)];
+  } else {
+    streak=0;document.getElementById('streak').textContent='🔥0';
+    fb.className='feedback wrong';fb.textContent=['❌ Not this time!','💡 Keep thinking!'][Math.floor(Math.random()*2)];
+  }
+  document.getElementById('explanation').textContent='💡 The rule was: '+rule;
+  document.getElementById('explanation').style.display='block';
+  document.getElementById('nextBtn').style.display='block';
+}
+</script>
+</body>
+</html>

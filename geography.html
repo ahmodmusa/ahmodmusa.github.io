@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Explorer 🗺️</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0d0b1e;--card:#0e1a1a;--accent:#50e6a0;--accent2:#ffd93d;--text:#f0eaff;--muted:#9b8fc4}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+  .back-btn{position:fixed;top:16px;left:16px;background:rgba(255,255,255,0.1);border:none;color:white;padding:10px 18px;border-radius:100px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;text-decoration:none;font-size:0.9rem;z-index:100}
+  h1{font-family:'Fredoka One',cursive;font-size:2.5rem;background:linear-gradient(135deg,#50e6a0,#6bcbff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:60px 0 6px;text-align:center}
+  .subtitle{color:var(--muted);margin-bottom:30px;text-align:center}
+  .game-box{background:var(--card);border:2px solid rgba(80,230,160,0.2);border-radius:24px;padding:30px 36px;max-width:580px;width:100%}
+  .score-row{display:flex;justify-content:space-between;gap:10px;margin-bottom:20px}
+  .score-item{background:rgba(80,230,160,0.1);border-radius:12px;padding:10px 12px;flex:1;text-align:center}
+  .score-label{font-size:0.7rem;color:var(--muted);display:block}
+  .score-val{font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--accent)}
+  .country-display{text-align:center;margin:16px 0}
+  .country-flag{font-size:5rem;line-height:1;margin-bottom:8px;animation:flagWave 2s ease-in-out infinite}
+  @keyframes flagWave{0%,100%{transform:rotate(-3deg) scale(1)}50%{transform:rotate(3deg) scale(1.05)}}
+  .country-name{font-family:'Fredoka One',cursive;font-size:2rem;color:white;margin-bottom:4px}
+  .continent-badge{display:inline-block;background:rgba(80,230,160,0.12);border:1px solid rgba(80,230,160,0.3);color:var(--accent);padding:4px 14px;border-radius:100px;font-size:0.8rem;font-weight:800}
+  .question-card{background:rgba(255,255,255,0.04);border-radius:16px;padding:18px 22px;margin:14px 0;font-family:'Fredoka One',cursive;font-size:1.2rem;text-align:center;color:white;min-height:64px;display:flex;align-items:center;justify-content:center}
+  .options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+  .opt-btn{background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.12);color:var(--text);padding:14px 12px;border-radius:14px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.92rem;text-align:center;transition:all 0.2s;line-height:1.3}
+  .opt-btn:hover:not(:disabled){background:rgba(80,230,160,0.12);border-color:var(--accent)}
+  .opt-btn.correct{background:rgba(80,230,160,0.2);border-color:var(--accent)}
+  .opt-btn.wrong{background:rgba(255,107,107,0.12);border-color:#ff6b6b;color:#ff6b6b}
+  .feedback{font-family:'Fredoka One',cursive;font-size:1.4rem;text-align:center;min-height:42px;margin:8px 0}
+  .feedback.correct{color:#50e6a0}
+  .feedback.wrong{color:#ff6b6b}
+  .fact-box{background:rgba(80,230,160,0.07);border-left:4px solid var(--accent);padding:12px 16px;border-radius:0 12px 12px 0;font-size:0.92rem;line-height:1.6;margin:10px 0;display:none}
+  .next-btn{background:linear-gradient(135deg,#50e6a0,#6bcbff);border:none;color:#0d0b1e;padding:14px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.1rem;cursor:pointer;width:100%;margin-top:8px;display:none}
+  .region-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+  .region-btn{background:rgba(80,230,160,0.08);border:1px solid rgba(80,230,160,0.2);color:var(--text);padding:10px 6px;border-radius:12px;cursor:pointer;font-weight:700;font-size:0.82rem;text-align:center;transition:all 0.2s}
+  .region-btn.active,.region-btn:hover{background:var(--accent);border-color:var(--accent);color:#0d0b1e}
+  .start-btn{background:linear-gradient(135deg,#50e6a0,#6bcbff);border:none;color:#0d0b1e;padding:16px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.3rem;cursor:pointer;width:100%;margin-top:10px}
+  .start-screen h2{font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--accent);text-align:center;margin-bottom:10px}
+  .start-screen p{color:var(--muted);text-align:center;margin-bottom:14px;line-height:1.6}
+  .loading-dots::after{content:'...';animation:dots 1.2s steps(3,end) infinite}
+  @keyframes dots{0%,100%{clip-path:inset(0 67% 0 0)}33%{clip-path:inset(0 33% 0 0)}67%{clip-path:inset(0 0% 0 0)}}
+</style>
+</head>
+<body>
+<a href="index.html" class="back-btn">← Home</a>
+<h1>🗺️ World Explorer</h1>
+<p class="subtitle">Discover countries around the world!</p>
+
+<div class="game-box">
+  <div id="startScreen" class="start-screen">
+    <div style="font-size:4rem;text-align:center;margin-bottom:10px">🌍</div>
+    <h2>Let's explore the world! ✈️</h2>
+    <p>Learn amazing facts about countries, capitals, and cultures! AI generates fresh questions about each place.</p>
+    <div class="region-grid">
+      <button class="region-btn active" onclick="setRegion(this,'world')">🌍 World</button>
+      <button class="region-btn" onclick="setRegion(this,'Asia')">🏯 Asia</button>
+      <button class="region-btn" onclick="setRegion(this,'Europe')">🏰 Europe</button>
+      <button class="region-btn" onclick="setRegion(this,'Africa')">🦁 Africa</button>
+      <button class="region-btn" onclick="setRegion(this,'Americas')">🗽 Americas</button>
+      <button class="region-btn" onclick="setRegion(this,'Oceania')">🦘 Oceania</button>
+    </div>
+    <button class="start-btn" onclick="startGame()">🚀 Start Exploring!</button>
+  </div>
+
+  <div id="gameScreen" style="display:none">
+    <div class="score-row">
+      <div class="score-item"><span class="score-label">Score</span><span class="score-val" id="score">0</span></div>
+      <div class="score-item"><span class="score-label">Country</span><span class="score-val" id="cnum">1</span></div>
+      <div class="score-item"><span class="score-label">Streak</span><span class="score-val" id="streak">🔥0</span></div>
+    </div>
+    <div class="country-display">
+      <div class="country-flag" id="countryFlag">🌍</div>
+      <div class="country-name" id="countryName">Loading...</div>
+      <div class="continent-badge" id="continentBadge">World</div>
+    </div>
+    <div class="question-card" id="questionCard"><span class="loading-dots">Loading question</span></div>
+    <div class="options-grid" id="optionsGrid"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="fact-box" id="factBox"></div>
+    <button class="next-btn" id="nextBtn" onclick="loadCountry()">Next Country →</button>
+  </div>
+</div>
+
+<script>
+const COUNTRIES = {
+  world:[{name:'Malaysia',flag:'🇲🇾',region:'Asia'},{name:'Japan',flag:'🇯🇵',region:'Asia'},{name:'France',flag:'🇫🇷',region:'Europe'},{name:'Brazil',flag:'🇧🇷',region:'Americas'},{name:'Kenya',flag:'🇰🇪',region:'Africa'},{name:'Australia',flag:'🇦🇺',region:'Oceania'},{name:'Canada',flag:'🇨🇦',region:'Americas'},{name:'Egypt',flag:'🇪🇬',region:'Africa'},{name:'India',flag:'🇮🇳',region:'Asia'},{name:'Germany',flag:'🇩🇪',region:'Europe'},{name:'Mexico',flag:'🇲🇽',region:'Americas'},{name:'South Africa',flag:'🇿🇦',region:'Africa'},{name:'Italy',flag:'🇮🇹',region:'Europe'},{name:'China',flag:'🇨🇳',region:'Asia'},{name:'Argentina',flag:'🇦🇷',region:'Americas'},{name:'Thailand',flag:'🇹🇭',region:'Asia'},{name:'Nigeria',flag:'🇳🇬',region:'Africa'},{name:'New Zealand',flag:'🇳🇿',region:'Oceania'},{name:'Spain',flag:'🇪🇸',region:'Europe'},{name:'Indonesia',flag:'🇮🇩',region:'Asia'}],
+  Asia:[{name:'Malaysia',flag:'🇲🇾',region:'Asia'},{name:'Japan',flag:'🇯🇵',region:'Asia'},{name:'India',flag:'🇮🇳',region:'Asia'},{name:'China',flag:'🇨🇳',region:'Asia'},{name:'Thailand',flag:'🇹🇭',region:'Asia'},{name:'Indonesia',flag:'🇮🇩',region:'Asia'},{name:'Singapore',flag:'🇸🇬',region:'Asia'},{name:'South Korea',flag:'🇰🇷',region:'Asia'},{name:'Philippines',flag:'🇵🇭',region:'Asia'},{name:'Vietnam',flag:'🇻🇳',region:'Asia'}],
+  Europe:[{name:'France',flag:'🇫🇷',region:'Europe'},{name:'Germany',flag:'🇩🇪',region:'Europe'},{name:'Italy',flag:'🇮🇹',region:'Europe'},{name:'Spain',flag:'🇪🇸',region:'Europe'},{name:'Netherlands',flag:'🇳🇱',region:'Europe'},{name:'Switzerland',flag:'🇨🇭',region:'Europe'},{name:'Portugal',flag:'🇵🇹',region:'Europe'},{name:'Poland',flag:'🇵🇱',region:'Europe'},{name:'Sweden',flag:'🇸🇪',region:'Europe'},{name:'Greece',flag:'🇬🇷',region:'Europe'}],
+  Africa:[{name:'Kenya',flag:'🇰🇪',region:'Africa'},{name:'Egypt',flag:'🇪🇬',region:'Africa'},{name:'South Africa',flag:'🇿🇦',region:'Africa'},{name:'Nigeria',flag:'🇳🇬',region:'Africa'},{name:'Morocco',flag:'🇲🇦',region:'Africa'},{name:'Tanzania',flag:'🇹🇿',region:'Africa'},{name:'Ethiopia',flag:'🇪🇹',region:'Africa'},{name:'Ghana',flag:'🇬🇭',region:'Africa'}],
+  Americas:[{name:'Brazil',flag:'🇧🇷',region:'Americas'},{name:'Canada',flag:'🇨🇦',region:'Americas'},{name:'Mexico',flag:'🇲🇽',region:'Americas'},{name:'Argentina',flag:'🇦🇷',region:'Americas'},{name:'Colombia',flag:'🇨🇴',region:'Americas'},{name:'Peru',flag:'🇵🇪',region:'Americas'},{name:'Chile',flag:'🇨🇱',region:'Americas'}],
+  Oceania:[{name:'Australia',flag:'🇦🇺',region:'Oceania'},{name:'New Zealand',flag:'🇳🇿',region:'Oceania'},{name:'Fiji',flag:'🇫🇯',region:'Oceania'},{name:'Papua New Guinea',flag:'🇵🇬',region:'Oceania'}]
+};
+
+let region='world', score=0, cnum=0, streak=0, currentCountry=null;
+
+function setRegion(btn,r){document.querySelectorAll('.region-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');region=r;}
+function startGame(){document.getElementById('startScreen').style.display='none';document.getElementById('gameScreen').style.display='block';loadCountry();}
+
+async function loadCountry(){
+  cnum++;
+  document.getElementById('cnum').textContent=cnum;
+  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('factBox').style.display='none';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('optionsGrid').innerHTML='';
+  document.getElementById('questionCard').innerHTML='<span class="loading-dots">Loading question</span>';
+
+  const pool=COUNTRIES[region]||COUNTRIES.world;
+  currentCountry=pool[Math.floor(Math.random()*pool.length)];
+  document.getElementById('countryFlag').textContent=currentCountry.flag;
+  document.getElementById('countryName').textContent=currentCountry.name;
+  document.getElementById('continentBadge').textContent=currentCountry.region;
+
+  try {
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:`Create a fun geography question about ${currentCountry.name} for an 8-year-old.
+Return ONLY valid JSON:
+{"question":"The question (could be about capital, famous food, animal, landmark, language, etc.)","options":["Correct answer","Wrong1","Wrong2","Wrong3"],"fact":"One amazing fun fact about ${currentCountry.name} for a child (start with emoji)"}
+First option must be correct.`}]})
+    });
+    const data=await res.json();
+    let txt=data.content[0].text.trim().replace(/```json|```/g,'').trim();
+    const q=JSON.parse(txt);
+    
+    document.getElementById('questionCard').textContent=q.question;
+    const opts=q.options.slice();
+    const correct=opts[0];
+    opts.sort(()=>Math.random()-0.5);
+    
+    const grid=document.getElementById('optionsGrid');
+    opts.forEach(opt=>{
+      const btn=document.createElement('button');
+      btn.className='opt-btn';btn.textContent=opt;
+      btn.onclick=()=>checkAnswer(btn,opt===correct,q.fact,correct,grid);
+      grid.appendChild(btn);
+    });
+  } catch(e){
+    document.getElementById('questionCard').textContent=`What continent is ${currentCountry.name} in?`;
+    const opts=[currentCountry.region,'Europe','Asia','Africa'].sort(()=>Math.random()-0.5);
+    const grid=document.getElementById('optionsGrid');
+    opts.forEach(opt=>{
+      const btn=document.createElement('button');btn.className='opt-btn';btn.textContent=opt;
+      btn.onclick=()=>checkAnswer(btn,opt===currentCountry.region,`${currentCountry.name} is a wonderful country in ${currentCountry.region}!`,currentCountry.region,grid);
+      grid.appendChild(btn);
+    });
+  }
+}
+
+function checkAnswer(btn,isCorrect,fact,correctAns,grid){
+  Array.from(grid.children).forEach(b=>{b.disabled=true;if(b.textContent===correctAns)b.classList.add('correct');else if(b===btn&&!isCorrect)b.classList.add('wrong');});
+  const fb=document.getElementById('feedback');
+  if(isCorrect){
+    score+=15;streak++;
+    document.getElementById('score').textContent=score;document.getElementById('streak').textContent='🔥'+streak;
+    fb.className='feedback correct';fb.textContent=['🎉 Correct!','⭐ Amazing!','🌍 You know your world!','✈️ Explorer!'][Math.floor(Math.random()*4)];
+  } else {
+    streak=0;document.getElementById('streak').textContent='🔥0';
+    fb.className='feedback wrong';fb.textContent=['❌ Not quite!','💡 Keep exploring!'][Math.floor(Math.random()*2)];
+  }
+  document.getElementById('factBox').textContent=fact;
+  document.getElementById('factBox').style.display='block';
+  document.getElementById('nextBtn').style.display='block';
+}
+</script>
+</body>
+</html>

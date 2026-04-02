@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Riddle Master 🤔</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0d0b1e;--card:#1a1510;--accent:#ffc850;--accent2:#ff9a3c;--text:#f0eaff;--muted:#9b8fc4}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+  .back-btn{position:fixed;top:16px;left:16px;background:rgba(255,255,255,0.1);border:none;color:white;padding:10px 18px;border-radius:100px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;text-decoration:none;font-size:0.9rem;z-index:100}
+  h1{font-family:'Fredoka One',cursive;font-size:2.5rem;background:linear-gradient(135deg,#ffc850,#ff6b9d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:60px 0 6px;text-align:center}
+  .subtitle{color:var(--muted);margin-bottom:30px;text-align:center}
+  .game-box{background:var(--card);border:2px solid rgba(255,200,80,0.2);border-radius:24px;padding:30px 36px;max-width:540px;width:100%}
+  .score-row{display:flex;justify-content:space-between;gap:10px;margin-bottom:20px}
+  .score-item{background:rgba(255,200,80,0.1);border-radius:12px;padding:10px 12px;flex:1;text-align:center}
+  .score-label{font-size:0.7rem;color:var(--muted);display:block}
+  .score-val{font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--accent)}
+  .riddle-emoji{font-size:4rem;text-align:center;margin:16px 0;animation:think 2s ease-in-out infinite}
+  @keyframes think{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+  .riddle-card{background:rgba(255,200,80,0.07);border:1px solid rgba(255,200,80,0.2);border-radius:18px;padding:24px;margin:12px 0;font-size:1.1rem;line-height:1.8;text-align:center;min-height:100px;display:flex;align-items:center;justify-content:center}
+  .answer-input{background:rgba(255,255,255,0.08);border:2px solid rgba(255,200,80,0.3);border-radius:14px;padding:14px 18px;font-family:'Nunito',sans-serif;font-size:1.1rem;color:white;width:100%;outline:none;transition:border-color 0.2s;margin-bottom:10px}
+  .answer-input:focus{border-color:var(--accent)}
+  .btn-row{display:flex;gap:10px}
+  .submit-btn{background:linear-gradient(135deg,#ffc850,#ff9a3c);border:none;color:#0d0b1e;padding:14px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.1rem;cursor:pointer;flex:2}
+  .submit-btn:hover{transform:scale(1.04)}
+  .hint-btn{background:rgba(107,203,255,0.12);border:1px solid rgba(107,203,255,0.3);color:#6bcbff;padding:14px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;flex:1}
+  .reveal-btn{background:rgba(255,107,107,0.12);border:1px solid rgba(255,107,107,0.3);color:#ff6b6b;padding:14px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:0.95rem;cursor:pointer;flex:1}
+  .feedback{font-family:'Fredoka One',cursive;font-size:1.6rem;text-align:center;min-height:48px;margin:10px 0}
+  .feedback.correct{color:#a8ff78}
+  .feedback.wrong{color:#ff6b6b}
+  .answer-reveal{background:rgba(168,255,120,0.08);border-left:4px solid #a8ff78;padding:14px 18px;border-radius:0 14px 14px 0;margin:10px 0;display:none}
+  .answer-reveal strong{color:#a8ff78;font-size:1.2rem}
+  .next-btn{background:linear-gradient(135deg,#ffc850,#ff9a3c);border:none;color:#0d0b1e;padding:14px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.1rem;cursor:pointer;width:100%;margin-top:10px;display:none}
+  .diff-row{display:flex;gap:8px;justify-content:center;margin:12px 0}
+  .diff-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--text);padding:8px 18px;border-radius:100px;cursor:pointer;font-weight:700;font-size:0.85rem;transition:all 0.2s}
+  .diff-btn.active,.diff-btn:hover{background:var(--accent);color:#0d0b1e;border-color:var(--accent)}
+  .start-btn{background:linear-gradient(135deg,#ffc850,#ff9a3c);border:none;color:#0d0b1e;padding:16px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:1.3rem;cursor:pointer;width:100%;margin-top:10px}
+  .start-screen h2{font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--accent);text-align:center;margin-bottom:10px}
+  .start-screen p{color:var(--muted);text-align:center;margin-bottom:14px;line-height:1.6}
+  .hint-display{background:rgba(107,203,255,0.08);border-left:3px solid #6bcbff;padding:10px 14px;border-radius:0 10px 10px 0;font-size:0.9rem;margin:8px 0;display:none;color:#6bcbff}
+  .tries-display{color:var(--muted);font-size:0.88rem;text-align:center;margin:4px 0}
+  .loading-dots::after{content:'...';animation:dots 1.2s steps(3,end) infinite}
+  @keyframes dots{0%,100%{clip-path:inset(0 67% 0 0)}33%{clip-path:inset(0 33% 0 0)}67%{clip-path:inset(0 0% 0 0)}}
+</style>
+</head>
+<body>
+<a href="index.html" class="back-btn">← Home</a>
+<h1>🤔 Riddle Master</h1>
+<p class="subtitle">Can you crack these tricky riddles?</p>
+
+<div class="game-box">
+  <div id="startScreen" class="start-screen">
+    <div style="font-size:4rem;text-align:center;margin-bottom:12px">🧩</div>
+    <h2>Ready to be puzzled? 😄</h2>
+    <p>AI creates brand new riddles every time! The harder the level, the trickier the riddle. Use hints if you get stuck!</p>
+    <div class="diff-row">
+      <button class="diff-btn active" onclick="setDiff(this,'easy')">😊 Easy</button>
+      <button class="diff-btn" onclick="setDiff(this,'medium')">🧐 Medium</button>
+      <button class="diff-btn" onclick="setDiff(this,'hard')">🤯 Hard</button>
+    </div>
+    <button class="start-btn" onclick="startGame()">🎭 Start Riddling!</button>
+  </div>
+
+  <div id="gameScreen" style="display:none">
+    <div class="score-row">
+      <div class="score-item"><span class="score-label">Score</span><span class="score-val" id="score">0</span></div>
+      <div class="score-item"><span class="score-label">Riddle</span><span class="score-val" id="rnum">1</span></div>
+      <div class="score-item"><span class="score-label">Streak</span><span class="score-val" id="streak">🔥0</span></div>
+    </div>
+    <div class="riddle-emoji" id="riddleEmoji">🤔</div>
+    <div class="riddle-card" id="riddleCard"><span class="loading-dots">Creating your riddle</span></div>
+    <div class="hint-display" id="hintDisplay"></div>
+    <div class="tries-display" id="triesDisplay"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="answer-reveal" id="answerReveal"></div>
+    <input type="text" class="answer-input" id="answerInput" placeholder="Type your answer here..." onkeydown="if(event.key==='Enter')checkAnswer()" autocomplete="off">
+    <div class="btn-row">
+      <button class="submit-btn" onclick="checkAnswer()">✓ Submit</button>
+      <button class="hint-btn" onclick="showHint()">💡 Hint</button>
+      <button class="reveal-btn" onclick="giveUp()">😅 Give Up</button>
+    </div>
+    <button class="next-btn" id="nextBtn" onclick="loadRiddle()">Next Riddle →</button>
+  </div>
+</div>
+
+<script>
+let difficulty='easy', score=0, rnum=0, streak=0, currentAnswer='', currentHint='', tries=0, hintShown=false, answered=false;
+
+function setDiff(btn,d){document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');difficulty=d;}
+
+function startGame(){document.getElementById('startScreen').style.display='none';document.getElementById('gameScreen').style.display='block';loadRiddle();}
+
+async function loadRiddle(){
+  tries=0; hintShown=false; answered=false;
+  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('answerReveal').style.display='none';
+  document.getElementById('hintDisplay').style.display='none';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('answerInput').value='';
+  document.getElementById('answerInput').disabled=false;
+  document.getElementById('triesDisplay').textContent='';
+  rnum++;
+  document.getElementById('rnum').textContent=rnum;
+  document.getElementById('riddleCard').innerHTML='<span class="loading-dots">Creating your riddle</span>';
+  document.getElementById('riddleEmoji').textContent='🤔';
+
+  const emojis=['🧩','🎭','🔮','🎪','🃏','🎯','🌀'];
+
+  try {
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:`Create a ${difficulty} riddle for an 8-year-old girl named Sumaiya. The answer should be a simple, common word or object.
+Return ONLY valid JSON:
+{"riddle":"The riddle text (2-3 lines of poetic clues)","answer":"one word answer (lowercase)","hint":"A helpful hint without giving away the answer","emoji":"one relevant emoji for the answer topic"}`}]})
+    });
+    const data=await res.json();
+    let txt=data.content[0].text.trim().replace(/```json|```/g,'').trim();
+    const r=JSON.parse(txt);
+    currentAnswer=r.answer.toLowerCase().trim();
+    currentHint=r.hint;
+    document.getElementById('riddleCard').textContent=r.riddle;
+    document.getElementById('riddleEmoji').textContent=r.emoji||'🤔';
+  } catch(e){
+    const fallbacks=[
+      {riddle:"I have hands but cannot clap,\nI have a face but cannot smile,\nI tell you something very important every day.\nWhat am I?",answer:"clock",hint:"You look at me to know the time",emoji:"🕐"},
+      {riddle:"The more you take, the more you leave behind.\nWhat am I?",answer:"footsteps",hint:"Think about what happens when you walk",emoji:"👣"},
+      {riddle:"I speak without a mouth and hear without ears.\nI have no body, but I come alive with the wind.\nWhat am I?",answer:"echo",hint:"Say something in a big cave or mountain!",emoji:"🏔️"},
+    ];
+    const f=fallbacks[Math.floor(Math.random()*fallbacks.length)];
+    currentAnswer=f.answer; currentHint=f.hint;
+    document.getElementById('riddleCard').textContent=f.riddle;
+    document.getElementById('riddleEmoji').textContent=f.emoji;
+  }
+  document.getElementById('answerInput').focus();
+}
+
+function showHint(){
+  hintShown=true;
+  document.getElementById('hintDisplay').textContent='💡 Hint: '+currentHint;
+  document.getElementById('hintDisplay').style.display='block';
+}
+
+function checkAnswer(){
+  if(answered) return;
+  const val=document.getElementById('answerInput').value.trim().toLowerCase();
+  if(!val) return;
+  tries++;
+  document.getElementById('triesDisplay').textContent=`Tries: ${tries}`;
+  const fb=document.getElementById('feedback');
+  
+  // Check if answer is close enough
+  if(val===currentAnswer||currentAnswer.includes(val)&&val.length>=3||val.includes(currentAnswer)){
+    answered=true;
+    const pts=hintShown?10:Math.max(25-tries*3,10);
+    score+=pts; streak++;
+    document.getElementById('score').textContent=score;
+    document.getElementById('streak').textContent='🔥'+streak;
+    fb.className='feedback correct';
+    fb.textContent=['🎉 You got it!','⭐ Brilliant!','🧠 Genius!','🔥 Smart!'][Math.floor(Math.random()*4)];
+    document.getElementById('answerReveal').innerHTML=`<strong>✅ Answer: ${currentAnswer.toUpperCase()}</strong>`;
+    document.getElementById('answerReveal').style.display='block';
+    document.getElementById('answerInput').disabled=true;
+    document.getElementById('nextBtn').style.display='block';
+  } else {
+    streak=0; document.getElementById('streak').textContent='🔥0';
+    fb.className='feedback wrong';
+    const msgs=['❌ Not quite! Try again!','🤔 Hmm, think harder!','💭 Interesting guess... but no!','😄 Nope! Think differently!'];
+    fb.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+    document.getElementById('answerInput').value='';
+    if(tries>=4&&!hintShown) showHint();
+  }
+}
+
+function giveUp(){
+  answered=true;
+  streak=0; document.getElementById('streak').textContent='🔥0';
+  document.getElementById('feedback').className='feedback wrong';
+  document.getElementById('feedback').textContent='😅 Better luck next time!';
+  document.getElementById('answerReveal').innerHTML=`<strong>💡 Answer: ${currentAnswer.toUpperCase()}</strong><br><span style="color:var(--muted);font-size:0.9rem">Don't worry — now you know! 😊</span>`;
+  document.getElementById('answerReveal').style.display='block';
+  document.getElementById('answerInput').disabled=true;
+  document.getElementById('nextBtn').style.display='block';
+}
+</script>
+</body>
+</html>
